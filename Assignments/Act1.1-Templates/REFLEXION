@@ -1,0 +1,12 @@
+// Reflexión
+
+//1. Una ventaja de usar templates es que puedo utilizar la misma clase con diferentes tipos de datos sin tener que hacer una clase 
+//diferente para cada uno. Por ejemplo, en mi código utilicé "List<int>" para guardar números y "List<string>" para guardar "bottle", 
+//usando las mismas funciones de la lista.
+
+//2. Lo que más trabajo me costó fue lograr que el código compilara correctamente. Al principio VS Code no reconocía g++,
+// así que tuve que instalar y configurar el compilador. También tuve algunos errores en el código que fui corrigiendo para poder compilar
+// y probar el programa. Al final pude ejecutarlo y revisar que las funciones de la lista funcionaran correctamente.
+
+//3. Yo diría que un template sirve para no tener que escribir el mismo código varias veces para diferentes tipos de datos. Al usarlo, 
+//el código se adapta al tipo de dato que necesites, ya sea int, string, float, entre otros.

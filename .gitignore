@@ -33,3 +33,9 @@
 
 # Carpeta Tools
 /Tools
+
+# VS Code configuration
+.vscode/
+
+# Executable files
+*.exe
