@@ -1,7 +1,7 @@
 //Isis Krystal Agramón Leal
 //A00843802
 
-//# Reflexión
+// Reflexión
 
 //1. Noté más la diferencia en Fibonacci, porque al usar la recursiva se tienen que hacer muchas llamadas para llegar al resultado, mientras
 //que la iterativa lo hace de una forma más sencilla. Es decir que la recursiva puede tardar más y usar más memoria al crear el programa.
