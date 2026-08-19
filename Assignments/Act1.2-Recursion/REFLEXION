@@ -1,0 +1,14 @@
+//Isis Krystal Agramón Leal
+//A00843802
+
+//# Reflexión
+
+//1. Noté más la diferencia en Fibonacci, porque al usar la recursiva se tienen que hacer muchas llamadas para llegar al resultado, mientras
+//que la iterativa lo hace de una forma más sencilla. Es decir que la recursiva puede tardar más y usar más memoria al crear el programa.
+
+//2. Creo que esto demuestra que antes de empezar a hacer un código es bueno revisar si existe una forma más fácil de resolver el problema. 
+//En este caso, con la fórmula podemos llegar al mismo resultado mucho más rápido y sin tener que hacer tantos pasos. Aparte, e código se ve 
+//más limpio al no utlizar tantas líneas de código.
+
+//3. Creo que tendría problemas porque tendría que llamar a la función demasiadas veces y podría quedarse sin memoria. Es este caso,
+//usaría la función iterativa, porque puede hacer los cálculos con un ciclo y no necesita hacer tantas llamadas.
