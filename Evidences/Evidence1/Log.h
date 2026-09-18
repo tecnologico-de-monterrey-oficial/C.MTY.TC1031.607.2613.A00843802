@@ -17,7 +17,7 @@ struct Log{
     string key;
     
     Log();
-    Log(int year, string month, int day, string time, string ip, string message, string key);
+    Log(int _year, string _month, int _day, string _time, string _ip, string _message);
     string createKey();
     bool operator>(const Log &other) const;
     bool operator<(const Log &other) const;
@@ -122,5 +122,23 @@ string Log::createKey() {
     return key;
 }
 
+Log::Log(){
+    year = 0;
+    month = "";
+    day = 0;
+    time = "";
+    ip = "";
+    message = "";
+    key = "";
+}
 
+Log::Log(int _year, string _month, int _day, string _time, string _ip, string _message){
+    year = _year;
+    month = _month; 
+    day = _day;
+    time = _time;
+    ip = _ip;
+    message = _message;
+    key = createKey();
+}
 
