@@ -142,3 +142,4 @@ Log::Log(int _year, string _month, int _day, string _time, string _ip, string _m
     key = createKey();
 }
 
+#endif
