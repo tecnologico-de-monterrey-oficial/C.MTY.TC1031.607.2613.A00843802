@@ -27,4 +27,51 @@ void swapSort(vector<T> &list) {
     }
  }
 
+template <typename T>
+void bubbleSort(vector<T> &list) {
+    bool change = true;
+    for (int i = list.size() - 1; i > 0 && change; i--) {
+        change = false;
+        for (int j = 0; j < i; j++) {
+            if (list[j] > list[j + 1]) {
+                change = true;
+                swap(list, j, j + 1);
+            }
+        }
+    }
+}
+
+template <typename T>
+void selectionSort(vector<T> &list) {
+
+    for (int i = 0; i < list.size() - 1; i++) {
+        int min = i;
+        for (int j = i + 1; j < list.size(); j++) {
+            if (list[j] < list[min]) {
+                min = j;
+            }
+            if (min != i) {
+                swap(list, min, i);
+            }
+        }
+    }
+}
+
+template <typename T>
+void insertionSort(vector<T> &list) {
+
+    for (int i = 1; i < list.size(); i++) {
+        int j = i;
+        while (j > 0) {
+            if (list[j] < list[j - 1]) {
+                swap(list, j, j - 1);
+                j--;
+            }
+            else {
+                break;
+            }
+        }
+    }
+}
+
 #endif

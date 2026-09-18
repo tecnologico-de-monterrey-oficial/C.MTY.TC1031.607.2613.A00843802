@@ -39,7 +39,7 @@ int main(){
     
 cout << "Total de logs: " << logs.size() << endl;
 cout << "Primer log: " << logs[0].key << endl;
-swapSort(logs);
+insertionSort(logs);
 cout << "Primer log ordenado: " << logs[0].key << endl;
 cout << "Ultimo log ordenado: " << logs[logs.size() - 1].key << endl;
     return 0;
