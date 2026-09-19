@@ -189,5 +189,11 @@ switch (opcionAlgoritmo){
     cout << "Primer log ordenado: " << logs[0].key << endl;
     cout << "Ultimo log ordenado: " << logs[logs.size() - 1].key << endl;
 
+    ofstream output;
+    output.open("output608.txt");
+    for (int i = 0; i < logs.size(); i++){
+    output << logs[i].month << " " << logs[i].day << " " << logs[i].year << " " << logs[i].time << " " << logs[i].ip << " " << logs[i].message << endl;
+
+}
     return 0;
 }
