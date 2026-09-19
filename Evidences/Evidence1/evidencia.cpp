@@ -7,6 +7,7 @@
 #include <vector>
 #include "Log.h"
 #include "Sorts.h"
+#include <chrono>
 
 using namespace std;
 
@@ -65,9 +66,114 @@ int main(){
     cout << "Archivo seleccionado: " << fileName << endl;
 
     cout << "Total de logs: " << logs.size() << endl;
-    cout << "Primer log: " << logs[0].key << endl;
 
-    selectionSort(logs);
+    int opcionAlgoritmo;
+    cout << "Selecciona el algoritmo de ordenamiento:" << endl;
+    cout << "Escribe 1 para Swap Sort" << endl;
+    cout << "Escribe 2 para Bubble Sort" << endl;
+    cout << "Escribe 3 para Selection Sort" << endl;
+    cout << "Escribe 4 para Insertion Sort" << endl;
+    cout << "Escribe 5 para Quick Sort" << endl;
+    cout << "Escribe 6 para Merge Sort" << endl;
+    cout << "Escribe 7 para Shell Sort" << endl;
+    cout << "Opcion: ";
+    cin >> opcionAlgoritmo;
+
+    string prediccion;
+    string razon;
+
+    cout << "Crees que este algoritmo sera rapido o lento? ";
+    cin >> prediccion;
+    cout << "Por que? ";
+    getline(cin >> ws, razon);
+
+    string nombreAlgoritmo;
+
+    auto inicio = chrono::high_resolution_clock::now();
+
+    switch (opcionAlgoritmo){
+    case 1:
+        nombreAlgoritmo = "Swap Sort";
+        swapSort(logs);
+        break;
+
+    case 2:
+        nombreAlgoritmo = "Bubble Sort";
+        bubbleSort(logs);
+        break;
+
+    case 3:
+        nombreAlgoritmo = "Selection Sort";
+        selectionSort(logs);
+        break;
+
+    case 4:
+        nombreAlgoritmo = "Insertion Sort";
+        insertionSort(logs);
+        break;
+
+    case 5:
+        nombreAlgoritmo = "Quick Sort";
+        quickSort(logs, 0, logs.size() - 1);
+        break;
+
+    case 6:
+        nombreAlgoritmo = "Merge Sort";
+        mergeSort(logs, 0, logs.size() - 1);
+        break;
+
+    case 7:
+        nombreAlgoritmo = "Shell Sort";
+        shellSort(logs);
+        break;
+
+    default:
+        cout << "Opcion invalida." << endl;
+        return 1;
+}
+
+auto fin = chrono::high_resolution_clock::now();
+chrono::duration<double, milli> duracion = fin - inicio;
+cout << "Algoritmo: " << nombreAlgoritmo << endl;
+cout << "Tiempo de ejecucion: " << duracion.count() << " ms" << endl;
+
+switch (opcionAlgoritmo){
+    case 1:
+        cout << "Mejor caso: O(n^2)" << endl;
+        cout << "Peor caso: O(n^2)" << endl;
+        break;
+
+    case 2:
+        cout << "Mejor caso: O(n)" << endl;
+        cout << "Peor caso: O(n^2)" << endl;
+        break;
+    case 3:
+        cout << "Mejor caso: O(n^2)" << endl;
+        cout << "Peor caso: O(n^2)" << endl;
+    break;
+
+    case 4:
+        cout << "Mejor caso: O(n)" << endl;
+        cout << "Peor caso: O(n^2)" << endl;
+    break;
+
+    case 5:
+        cout << "Mejor caso: O(n log n)" << endl;
+        cout << "Peor caso: O(n^2)" << endl;
+    break;
+
+    case 6:
+        cout << "Mejor caso: O(n log n)" << endl;
+        cout << "Peor caso: O(n log n)" << endl;
+    break;
+
+    case 7:
+        cout << "Mejor caso: O(n log n)" << endl;
+        cout << "Peor caso: O(n^2)" << endl;
+    break;
+
+    
+}
 
     bool ordenado = true;
 
