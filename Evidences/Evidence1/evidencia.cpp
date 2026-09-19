@@ -36,6 +36,22 @@ vector<Log> readFile(string fileName){
     return logs;
 }
 
+int buscarInicio(vector<Log> &logs, Log data) {
+    int left = 0;
+    int right = logs.size() - 1;
+    int result = logs.size();
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        if (logs[mid] >= data) {
+            result = mid;
+            right = mid - 1;
+        }
+        else {
+            left = mid + 1;
+        }
+    }
+    return result;
+}
 
 int main(){
 
@@ -194,6 +210,37 @@ switch (opcionAlgoritmo){
     for (int i = 0; i < logs.size(); i++){
     output << logs[i].month << " " << logs[i].day << " " << logs[i].year << " " << logs[i].time << " " << logs[i].ip << " " << logs[i].message << endl;
 
-}
+    }
+
+    string monthInicio;
+    int dayInicio;
+    int yearInicio;
+    string timeInicio;
+    cout << "Ingresa la fecha y hora inicial." << endl;
+    cout << "Usa el mes abreviado en ingles (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)." << endl;
+    cout << "Formato: Sep 8 2024 04:30:00" << endl;
+    cout << "Fecha inicial: ";
+    cin >> monthInicio >> dayInicio >> yearInicio >> timeInicio;
+
+    string monthFin;
+    int dayFin;
+    int yearFin;
+    string timeFin;
+    cout << "Ingresa la fecha y hora final." << endl;
+    cout << "Fecha final: ";
+    cin >> monthFin >> dayFin >> yearFin >> timeFin;
+
+    Log logInicio(yearInicio, monthInicio, dayInicio, timeInicio, "", "");
+    Log logFinal(yearFin, monthFin, dayFin, timeFin, "", "");
+
+    cout << "Key inicial: " << logInicio.key << endl;
+    cout << "Key final: " << logFinal.key << endl;
+
+    int posicionInicio = buscarInicio(logs, logInicio);
+
+    cout << "Posicion inicial encontrada: " << posicionInicio << endl;
+    cout << "Key encontrada: " << logs[posicionInicio].key << endl;
+
+
     return 0;
 }
