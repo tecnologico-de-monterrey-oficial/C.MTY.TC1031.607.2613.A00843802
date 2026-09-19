@@ -39,7 +39,19 @@ int main(){
     
 cout << "Total de logs: " << logs.size() << endl;
 cout << "Primer log: " << logs[0].key << endl;
-insertionSort(logs);
+selectionSort(logs);
+
+bool ordenado = true;
+
+for (int i = 1; i < logs.size(); i++) {
+    if (logs[i] < logs[i - 1]) {
+        ordenado = false;
+        break;
+    }
+}
+
+cout << "Lista ordenada: " << ordenado << endl;
+
 cout << "Primer log ordenado: " << logs[0].key << endl;
 cout << "Ultimo log ordenado: " << logs[logs.size() - 1].key << endl;
     return 0;
