@@ -53,6 +53,24 @@ int buscarInicio(vector<Log> &logs, Log data) {
     return result;
 }
 
+int buscarFinal(vector<Log> &logs, Log data) {
+    int left = 0;
+    int right = logs.size() - 1;
+    int result = logs.size();
+
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        if (logs[mid] > data) {
+        result = mid;
+        right = mid - 1;
+    }
+    else {
+        left = mid + 1;
+    }
+    }
+    return result;
+}
+
 int main(){
 
     int opcionArchivo;
@@ -240,6 +258,19 @@ switch (opcionAlgoritmo){
 
     cout << "Posicion inicial encontrada: " << posicionInicio << endl;
     cout << "Key encontrada: " << logs[posicionInicio].key << endl;
+
+    int posicionFinal = buscarFinal(logs, logFinal);
+
+    cout << "Posicion final encontrada: " << posicionFinal << endl;
+    cout << "Key despues del rango: " << logs[posicionFinal].key << endl;
+
+    ofstream rangeFile;
+    rangeFile.open("range607.txt");
+    for (int i = posicionInicio; i < posicionFinal; i++){
+        rangeFile << logs[i].month << " " << logs[i].day << " "
+          << logs[i].year << " " << logs[i].time << " "
+          << logs[i].ip << " " << logs[i].message << endl;      
+    }
 
 
     return 0;
