@@ -180,43 +180,61 @@ cin >> coincidencia;
 
 cout << "La prediccion coincidio: " << coincidencia << endl;
 
+string mejorCaso;
+string peorCaso; 
+
 switch (opcionAlgoritmo){
     case 1:
-        cout << "Mejor caso: O(n^2)" << endl;
-        cout << "Peor caso: O(n^2)" << endl;
-        break;
+    mejorCaso = "O(n^2)";
+    peorCaso = "O(n^2)";
+    break;
 
     case 2:
-        cout << "Mejor caso: O(n)" << endl;
-        cout << "Peor caso: O(n^2)" << endl;
+        mejorCaso = "O(n)";
+        peorCaso = "O(n^2)";
         break;
+
     case 3:
-        cout << "Mejor caso: O(n^2)" << endl;
-        cout << "Peor caso: O(n^2)" << endl;
-    break;
+        mejorCaso = "O(n^2)";
+        peorCaso = "O(n^2)";
+        break;
 
     case 4:
-        cout << "Mejor caso: O(n)" << endl;
-        cout << "Peor caso: O(n^2)" << endl;
-    break;
+        mejorCaso = "O(n)";
+        peorCaso = "O(n^2)";
+        break;
 
     case 5:
-        cout << "Mejor caso: O(n log n)" << endl;
-        cout << "Peor caso: O(n^2)" << endl;
-    break;
+        mejorCaso = "O(n log n)";
+        peorCaso = "O(n^2)";
+        break;
 
     case 6:
-        cout << "Mejor caso: O(n log n)" << endl;
-        cout << "Peor caso: O(n log n)" << endl;
-    break;
+        mejorCaso = "O(n log n)";
+        peorCaso = "O(n log n)";
+        break;
 
     case 7:
-        cout << "Mejor caso: O(n log n)" << endl;
-        cout << "Peor caso: O(n^2)" << endl;
-    break;
-
-    
+        mejorCaso = "O(n log n)";
+        peorCaso = "O(n^2)";
+        break;
 }
+
+cout << "Mejor caso: " << mejorCaso << endl;
+cout << "Peor caso: " << peorCaso << endl;
+
+ofstream resultados;
+resultados.open("resultados.txt", ios::app);
+
+resultados << "Algoritmo: " << nombreAlgoritmo << endl;
+resultados << "Archivo: " << fileName << endl;
+resultados << "Cantidad de registros: " << logs.size() << endl;
+resultados << "Tiempo de ejecucion: " << duracion.count() << " ms" << endl;
+resultados << "Mejor caso: " << mejorCaso << endl;
+resultados << "Peor caso: " << peorCaso << endl;
+resultados << "La prediccion coincidio: " << coincidencia << endl;
+resultados << endl;
+resultados.close();
 
     bool ordenado = true;
 

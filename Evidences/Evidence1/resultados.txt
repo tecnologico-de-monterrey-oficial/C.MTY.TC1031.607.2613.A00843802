@@ -1,0 +1,8 @@
+Algoritmo: Quick Sort
+Archivo: data/log607-1.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 22.8603 ms
+Mejor caso: O(n log n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
