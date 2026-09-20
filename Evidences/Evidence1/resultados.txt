@@ -1,7 +1,95 @@
+Algoritmo: Shell Sort
+Archivo: data/log607-1.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 40.998 ms
+Mejor caso: O(n log n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
+Algoritmo: Shell Sort
+Archivo: data/log607-2.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 29.6453 ms
+Mejor caso: O(n log n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
 Algoritmo: Quick Sort
 Archivo: data/log607-1.txt
 Cantidad de registros: 6818
-Tiempo de ejecucion: 22.8603 ms
+Tiempo de ejecucion: 27.4786 ms
+Mejor caso: O(n log n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
+Algoritmo: Quick Sort
+Archivo: data/log607-1.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 30.4979 ms
+Mejor caso: O(n log n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
+Algoritmo: Quick Sort
+Archivo: data/log607-2.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 148.237 ms
+Mejor caso: O(n log n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
+Algoritmo: Quick Sort
+Archivo: data/log607-1.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 26.2798 ms
+Mejor caso: O(n log n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
+Algoritmo: Quick Sort
+Archivo: data/log607-1.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 25.9757 ms
+Mejor caso: O(n log n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
+Algoritmo: Insertion Sort
+Archivo: data/log607-2.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 8.4033 ms
+Mejor caso: O(n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
+Algoritmo: Insertion Sort
+Archivo: data/log607-2.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 8.5884 ms
+Mejor caso: O(n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
+Algoritmo: Quick Sort
+Archivo: data/log607-1.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 27.6447 ms
+Mejor caso: O(n log n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
+Algoritmo: Insertion Sort
+Archivo: data/log607-2.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 11.1162 ms
+Mejor caso: O(n)
+Peor caso: O(n^2)
+La prediccion coincidio: si
+
+Algoritmo: Quick Sort
+Archivo: data/log607-1.txt
+Cantidad de registros: 6818
+Tiempo de ejecucion: 35.1242 ms
 Mejor caso: O(n log n)
 Peor caso: O(n^2)
 La prediccion coincidio: si
