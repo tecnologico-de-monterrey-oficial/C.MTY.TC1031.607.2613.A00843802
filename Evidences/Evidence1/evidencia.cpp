@@ -73,6 +73,9 @@ int buscarFinal(vector<Log> &logs, Log data) {
 
 int main(){
 
+    char continuar;
+
+do {
     int opcionArchivo;
     cout << "Selecciona el archivo:" << endl;
     cout << "Escribe 1 para seleccionar log607-1.txt" << endl;
@@ -171,6 +174,12 @@ chrono::duration<double, milli> duracion = fin - inicio;
 cout << "Algoritmo: " << nombreAlgoritmo << endl;
 cout << "Tiempo de ejecucion: " << duracion.count() << " ms" << endl;
 
+string coincidencia;
+cout << "Despues de ver el tiempo, tu prediccion coincidio? Escribe si o no: ";
+cin >> coincidencia;
+
+cout << "La prediccion coincidio: " << coincidencia << endl;
+
 switch (opcionAlgoritmo){
     case 1:
         cout << "Mejor caso: O(n^2)" << endl;
@@ -250,6 +259,48 @@ switch (opcionAlgoritmo){
 
     Log logInicio(yearInicio, monthInicio, dayInicio, timeInicio, "", "");
     Log logFinal(yearFin, monthFin, dayFin, timeFin, "", "");
+   
+ if (logInicio.key == "" || logFinal.key == ""){
+    cout << "Error: formato de fecha invalido." << endl;
+    return 1;
+}
+
+if (logInicio > logFinal){
+    cout << "Error: la fecha inicial no puede ser posterior a la fecha final." << endl;
+    return 1;
+}
+
+if (dayInicio < 1 || dayInicio > 31 || dayFin < 1 || dayFin > 31){
+    cout << "Error: dia invalido." << endl;
+    return 1;
+}
+
+if (timeInicio.size() != 8 || timeFin.size() != 8){
+    cout << "Error: formato de hora invalido." << endl;
+    return 1;
+}
+
+if (timeInicio[2] != ':' || timeInicio[5] != ':' ||
+    timeFin[2] != ':' || timeFin[5] != ':'){
+    cout << "Error: formato de hora invalido." << endl;
+    return 1;
+}
+
+int horaInicio = stoi(timeInicio.substr(0, 2));
+int horaFin = stoi(timeFin.substr(0, 2));
+int minutoInicio = stoi(timeInicio.substr(3, 2));
+int minutoFin = stoi(timeFin.substr(3, 2));
+
+int segundoInicio = stoi(timeInicio.substr(6, 2));
+int segundoFin = stoi(timeFin.substr(6, 2));
+
+if (horaInicio < 0 || horaInicio > 23 || horaFin < 0 || horaFin > 23 ||
+    minutoInicio < 0 || minutoInicio > 59 || minutoFin < 0 || minutoFin > 59 ||
+    segundoInicio < 0 || segundoInicio > 59 || segundoFin < 0 || segundoFin > 59){
+    cout << "Error: hora invalida." << endl;
+    return 1;
+}
+
 
     cout << "Key inicial: " << logInicio.key << endl;
     cout << "Key final: " << logFinal.key << endl;
@@ -257,21 +308,26 @@ switch (opcionAlgoritmo){
     int posicionInicio = buscarInicio(logs, logInicio);
 
     cout << "Posicion inicial encontrada: " << posicionInicio << endl;
-    cout << "Key encontrada: " << logs[posicionInicio].key << endl;
 
     int posicionFinal = buscarFinal(logs, logFinal);
 
     cout << "Posicion final encontrada: " << posicionFinal << endl;
-    cout << "Key despues del rango: " << logs[posicionFinal].key << endl;
-
     ofstream rangeFile;
     rangeFile.open("range607.txt");
-    for (int i = posicionInicio; i < posicionFinal; i++){
-        rangeFile << logs[i].month << " " << logs[i].day << " "
-          << logs[i].year << " " << logs[i].time << " "
-          << logs[i].ip << " " << logs[i].message << endl;      
-    }
+        if (posicionInicio >= posicionFinal){
+        cout << "No se encontraron logs en ese rango." << endl;  
+    }else {
+            for (int i = posicionInicio; i < posicionFinal; i++){
+                rangeFile << logs[i].month << " " << logs[i].day << " "
+                        << logs[i].year << " " << logs[i].time << " "
+                        << logs[i].ip << " " << logs[i].message << endl;
+            }
+   }
 
+cout << "Deseas realizar otra ejecucion? Escribe s o n: ";
+cin >> continuar;
 
-    return 0;
+} while (continuar == 's' || continuar == 'S');
+
+return 0;
 }
