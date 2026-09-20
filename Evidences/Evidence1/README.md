@@ -32,7 +32,8 @@
 //Para compilar el programa:
 
 ```powershell
-g++ evidencia.cpp -o evidencia
+g++ evidencia.cpp -o evidencia 
+```
 
 //Búsqueda por rango
 
