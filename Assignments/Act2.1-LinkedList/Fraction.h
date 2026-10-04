@@ -1,16 +1,41 @@
 //Isis Krystal Agramón Leal
 //A00843802
 
+#ifndef Fraction_h
+#define Fraction_h
 #include <iostream>
-using namespace std;
+// define una clase fracción básica
+class Fraction {
+private:
+    int numerator;
+    int denominator;
+public:
+    Fraction() : numerator(0), denominator(1) {}
+    Fraction(int num, int den) : numerator(num), denominator(den) {}
 
-#ifndef Fraction_h;
-#define 
+    int getNumerator() const {
+        return numerator;
+    }
 
-class Fraction(){
-    private
+    int getDenominator() const {
+        return denominator;
+    }
+
+    void setNumerator(int num) {
+        numerator = num;
+    }
+
+    void setDenominator(int den) {
+        denominator = den;
+    }
+
+    void print() const {
+        std::cout << numerator << "/" << denominator << std::endl;
+    }   
+
+    
+};
 
 
-}
 
- 
+#endif /* Fraction_h */

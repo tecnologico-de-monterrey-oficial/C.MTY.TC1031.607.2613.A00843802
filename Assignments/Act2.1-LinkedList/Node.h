@@ -1,11 +1,12 @@
+//Isis Krystal Agramón Leal 
+//A0843802
 #pragma once
 
-template <typename>
-    struct node{
-        T data;
-        share_ptr<Node<T>> next;
+template <typename T>
+struct Node {
+    T data;
+    Node<T>* next;
 
-        Node(const T& value) : data(value), next (nullptr);
-
-        Node(const T& value <Node<T>>nextNode) : data(value), next
-    };
+    Node(const T& value) : data(value), next(nullptr) {}
+    Node(const T& value, Node<T>* nextNode) : data(value), next(nextNode) {} 
+};
