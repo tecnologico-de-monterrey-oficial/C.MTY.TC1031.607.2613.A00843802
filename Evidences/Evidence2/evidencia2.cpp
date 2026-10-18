@@ -36,6 +36,20 @@ void buscarPorDia(DoublyLinkedList<Log>& logs, int anio, string mes, int dia) {
     }
 }
 
+void mostrarInverso(DoublyLinkedList<Log>& logs) {
+    //creamos un stack para guardar los registros
+    Stack<Log> stack;
+    //agregamos los registros al stack
+    for (int i = 0; i < logs.getSize(); i++) {
+        stack.push(logs.getData(i));
+    }
+    //mostramos los registros en orden inverso
+    while (!stack.isEmpty()) {
+        Log registro = stack.pop();
+        cout << registro.month << " " << registro.day << " " << registro.year << " " << registro.time << " " << registro.ip << " " << registro.message << endl;
+    }
+}
+
 int main() {
     //creamos nuestras estructuras
     Queue<Log> queue;
@@ -97,36 +111,21 @@ int main() {
     cout << "Primer registro: " << logs.getData(0).key << endl;
     cout << "Ultimo registro: " << logs.getData(logs.getSize() - 1).key << endl;
 
-    bool ordenado = true;
-    for (int i = 1; i < logs.getSize(); i++) {
-        if (logs.getData(i).key < logs.getData(i - 1).key) {
-            ordenado = false;
-            break;
-        }
-    }
-
-    if (ordenado) {
-        cout << "Todos los registros estan ordenados correctamente" << endl;
-    } else {
-        cout << "Error: hay registros desordenados" << endl;
-    }
-
     int anio, dia;
     string mes;
-
-    cout << "\nBUSQUEDA POR DIA" << endl;
-
+    cout << "\nBusqueda por dia" << endl;
     cout << "Ingresa el anio: ";
     cin >> anio;
-
     cout << "Ingresa el mes (Jan, Feb, Mar...): ";
     cin >> mes;
-
     cout << "Ingresa el dia: ";
     cin >> dia;
-
     //buscamos los registros de esa fecha
     buscarPorDia(logs, anio, mes, dia);
+
+    //mostramos los registros en orden inverso
+    cout << "\nRegistros en orden inverso:" << endl;
+    mostrarInverso(logs);
     
     return 0;
 }
