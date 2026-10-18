@@ -13,6 +13,39 @@
 #include "Log.h"
 
 using namespace std;
+bool fechaValida(int anio, string mes, int dia) {
+    string meses[12] = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    };
+    int diasMes[12] = {
+        31, 28, 31, 30, 31, 30,
+        31, 31, 30, 31, 30, 31
+    };
+    if (anio < 1) {
+        return false;
+    }
+    int posicion = -1;
+    for (int i = 0; i < 12; i++) {
+        if (mes == meses[i]) {
+            posicion = i;
+            break;
+        }
+    }
+    if (posicion == -1) {
+        return false;
+    }
+    //verificamos si el anio es bisiesto
+    if (posicion == 1) {
+        if ((anio % 4 == 0 && anio % 100 != 0) || anio % 400 == 0) {
+            diasMes[1] = 29;
+        }
+    }
+    if (dia < 1 || dia > diasMes[posicion]) {
+        return false;
+    }
+    return true;
+}
 
 void buscarPorDia(DoublyLinkedList<Log>& logs, int anio, string mes, int dia) {
     //variable para contar los registros encontrados
@@ -148,7 +181,6 @@ void mostrarEstadisticas(DoublyLinkedList<Log>& logs) {
 
     //mostramos la ip mas frecuente
     cout << "\nDireccion IP mas frecuente:" << endl;
-
     if (mayorIP == 0) {
         cout << "No hay registros." << endl;
     } else {
@@ -309,13 +341,18 @@ int main() {
             cin >> mes;
             cout << "Ingresa el dia: ";
             cin >> dia;
-            buscarPorDia(logs, anio, mes, dia);
-            //guardamos la fecha para utilizarla despues
-            ultimoAnio = anio;
-            ultimoMes = mes;
-            ultimoDia = dia;
-            hayBusqueda = true;
-        }
+           if (!fechaValida(anio, mes, dia)) {
+                cout << "Fecha no valida. Intenta nuevamente." << endl;
+            } else {
+                buscarPorDia(logs, anio, mes, dia);
+
+                //guardamos la fecha para utilizarla despues
+                ultimoAnio = anio;
+                ultimoMes = mes;
+                ultimoDia = dia;
+                hayBusqueda = true;
+                }
+            }
         } else if (opcion == 3) {
             if (!ordenado) {
                 cout << "Primero debes ordenar los registros con la opcion 1." << endl;
@@ -330,7 +367,12 @@ int main() {
                     cin >> ultimoDia;
                     hayBusqueda = true;
                 }
-                mostrarInverso(logs, ultimoAnio, ultimoMes, ultimoDia);
+                if (!fechaValida(ultimoAnio, ultimoMes, ultimoDia)) {
+                    cout << "Fecha no valida. Intenta nuevamente." << endl;
+                    hayBusqueda = false;
+                } else {
+                    mostrarInverso(logs, ultimoAnio, ultimoMes, ultimoDia);
+                }
                 }
         } else if (opcion == 4) {
             mostrarEstadisticas(logs);
