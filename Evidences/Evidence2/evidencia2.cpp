@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 #include <map>
+#include <chrono>
 #include "Queue.h"
 #include "DoublyLinkedList.h"
 #include "Stack.h"
@@ -66,10 +67,7 @@ void mostrarEstadisticas(DoublyLinkedList<Log>& logs) {
         Log registro = logs.getData(i);
 
         //guardamos la fecha completa
-        string fecha = registro.month + " " +
-                       to_string(registro.day) + " " +
-                       to_string(registro.year);
-
+        string fecha = registro.month + " " + to_string(registro.day) + " " + to_string(registro.year);
         //contamos las apariciones
         dias[fecha]++;
         eventos[registro.message]++;
@@ -86,13 +84,11 @@ void mostrarEstadisticas(DoublyLinkedList<Log>& logs) {
             mayorDia = dato.second;
         }
     }
-
     for (auto dato : eventos) {
         if (dato.second > mayorEvento) {
             mayorEvento = dato.second;
         }
     }
-
     for (auto dato : ips) {
         if (dato.second > mayorIP) {
             mayorIP = dato.second;
@@ -105,7 +101,6 @@ void mostrarEstadisticas(DoublyLinkedList<Log>& logs) {
 
     //mostramos el dia con mas incidentes
     cout << "\nDia con mas incidentes:" << endl;
-
     if (mayorDia == 0) {
         cout << "No hay registros." << endl;
     } else {
@@ -116,10 +111,8 @@ void mostrarEstadisticas(DoublyLinkedList<Log>& logs) {
             }
         }
     }
-
     //mostramos el evento mas frecuente
     cout << "\nTipo de evento mas frecuente:" << endl;
-
     if (mayorEvento == 0) {
         cout << "No hay registros." << endl;
     } else {
@@ -228,27 +221,49 @@ int main() {
             if (ordenado) {
                 cout << "Los registros ya estan ordenados." << endl;
             } else {
-                //ordenamos los registros
+                //preguntamos la prediccion
+                int prediccion;
+                cout << "Predice el crecimiento de comparaciones:" << endl;
+                cout << "1. n log n" << endl;
+                cout << "2. n^2" << endl;
+                cout << "Opcion: ";
+                cin >> prediccion;
+                //medimos el tiempo del ordenamiento
+                auto inicio = chrono::high_resolution_clock::now();
                 logs.mergeSort();
+                auto fin = chrono::high_resolution_clock::now();
+                chrono::duration<double, milli> tiempo = fin - inicio;
                 ordenado = true;
 
-                cout << "Registros ordenados correctamente." << endl;
-                cout << "Total: " << logs.getSize() << endl;
-            }
+                //mostramos los resultados
+                cout << "\nResultados del ordenamiento:" << endl;
+                cout << "Algoritmo: Merge Sort" << endl;
+                cout << "Archivo: " << nombreArchivo << endl;
+                cout << "Total de registros: " << logs.getSize() << endl;
+                cout << "Tiempo: " << tiempo.count() << " ms" << endl;
+                cout << "Comparaciones: " << logs.getComparaciones() << endl;
+                cout << "Profundidad maxima: " << logs.getProfundidadMaxima() << endl;
+
+                if (prediccion == 1) {
+                    cout << "Tu prediccion coincide con el crecimiento esperado de Merge Sort." << endl;
+                } else if (prediccion == 2) {
+                    cout << "Tu prediccion no coincide. Merge Sort tiene crecimiento O(n log n)." << endl;
+                } else {
+                    cout << "Prediccion no valida." << endl;
+                }
+                            }
         } else if (opcion == 2) {
             if (!ordenado) {
                 cout << "Primero debes ordenar los registros con la opcion 1." << endl;
             } else {
                 int anio, dia;
                 string mes;
-
                 cout << "Ingresa el anio: ";
                 cin >> anio;
                 cout << "Ingresa el mes (Jan, Feb, Mar...): ";
                 cin >> mes;
                 cout << "Ingresa el dia: ";
                 cin >> dia;
-
                 buscarPorDia(logs, anio, mes, dia);
             }
         } else if (opcion == 3) {

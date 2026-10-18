@@ -15,8 +15,10 @@ class DoublyLinkedList {
 private:
     NodeD<T>* head;
     NodeD<T>* tail;
+    long long comparaciones = 0;
+    int profundidadMaxima = 0;
     int size = 0;
-    NodeD<T>* mergeSort(NodeD<T>* inicio);
+    NodeD<T>* mergeSort(NodeD<T>* inicio, int profundidad);
     NodeD<T>* merge(NodeD<T>* izquierda, NodeD<T>* derecha);
 
 public:
@@ -40,6 +42,8 @@ public:
     void printReverse();
     bool deleteNode(NodeD<T>* node);
     void mergeSort();
+    long long getComparaciones();
+    int getProfundidadMaxima();
 };
 
 template <typename T>
@@ -413,14 +417,16 @@ bool DoublyLinkedList<T>::deleteNode(NodeD<T>* node) {
 
 template <typename T>
 void DoublyLinkedList<T>::mergeSort() {
+    //reiniciamos las mediciones
+    comparaciones = 0;
+    profundidadMaxima = 0;
+
     //validamos si la lista tiene elementos suficientes
     if (head == nullptr || head->next == nullptr) {
         return;
     }
-
     //ordenamos la lista
-    head = mergeSort(head);
-
+    head = mergeSort(head, 1);
     //actualizamos tail
     tail = head;
     while (tail->next != nullptr) {
@@ -429,12 +435,15 @@ void DoublyLinkedList<T>::mergeSort() {
 }
 
 template <typename T>
-NodeD<T>* DoublyLinkedList<T>::mergeSort(NodeD<T>* inicio) {
+NodeD<T>* DoublyLinkedList<T>::mergeSort(NodeD<T>* inicio, int profundidad) {
+    //guardamos la profundidad mayor
+    if (profundidad > profundidadMaxima) {
+        profundidadMaxima = profundidad;
+    }
     //validamos si llegamos al caso base
     if (inicio == nullptr || inicio->next == nullptr) {
         return inicio;
     }
-
     //buscamos la mitad de la lista
     NodeD<T>* lento = inicio;
     NodeD<T>* rapido = inicio->next;
@@ -443,32 +452,29 @@ NodeD<T>* DoublyLinkedList<T>::mergeSort(NodeD<T>* inicio) {
         lento = lento->next;
         rapido = rapido->next->next;
     }
-
     //dividimos la lista en dos partes
     NodeD<T>* derecha = lento->next;
     lento->next = nullptr;
     derecha->prev = nullptr;
-
     //ordenamos ambas mitades
-    NodeD<T>* izquierda = mergeSort(inicio);
-    derecha = mergeSort(derecha);
-
+    NodeD<T>* izquierda = mergeSort(inicio, profundidad + 1);
+    derecha = mergeSort(derecha, profundidad + 1);
     //unimos las mitades ordenadas
     return merge(izquierda, derecha);
 }
 
 template <typename T>
 NodeD<T>* DoublyLinkedList<T>::merge(NodeD<T>* izquierda, NodeD<T>* derecha) {
-    //validamos si alguna mitad está vacía
+    //validamos si alguna mitad esta vacia
     if (izquierda == nullptr) {
         return derecha;
     }
     if (derecha == nullptr) {
         return izquierda;
     }
-
     NodeD<T>* resultado = nullptr;
-
+    //contamos una comparacion
+    comparaciones++;
     //comparamos los datos de ambas mitades
     if (derecha->data < izquierda->data) {
         resultado = derecha;
@@ -477,7 +483,6 @@ NodeD<T>* DoublyLinkedList<T>::merge(NodeD<T>* izquierda, NodeD<T>* derecha) {
         resultado = izquierda;
         resultado->next = merge(izquierda->next, derecha);
     }
-
     //actualizamos los apuntadores prev
     if (resultado->next != nullptr) {
         resultado->next->prev = resultado;
@@ -486,6 +491,15 @@ NodeD<T>* DoublyLinkedList<T>::merge(NodeD<T>* izquierda, NodeD<T>* derecha) {
     return resultado;
 }
 
+template <typename T>
+long long DoublyLinkedList<T>::getComparaciones() {
+    return comparaciones;
+}
+
+template <typename T>
+int DoublyLinkedList<T>::getProfundidadMaxima() {
+    return profundidadMaxima;
+}
 
 
 #endif
