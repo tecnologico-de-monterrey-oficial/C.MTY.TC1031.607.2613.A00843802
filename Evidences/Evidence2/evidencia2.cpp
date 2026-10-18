@@ -12,6 +12,30 @@
 
 using namespace std;
 
+void buscarPorDia(DoublyLinkedList<Log>& logs, int anio, string mes, int dia) {
+    //variable para saber si encontramos registros
+    bool encontrado = false;
+    int cantidad = 0;
+
+    //recorremos los registros
+    for (int i = 0; i < logs.getSize(); i++) {
+        Log registro = logs.getData(i);
+        //comparamos la fecha
+        if (registro.year == anio && registro.month == mes && registro.day == dia) {
+            //mostramos el registro encontrado
+            cout << registro.month << " " << registro.day << " " << registro.year << " " << registro.time << " " << registro.ip << " " << registro.message << endl;
+            encontrado = true;
+            cantidad++;
+        }
+    }
+    //mostramos los resultados
+    if (!encontrado) {
+        cout << "No se encontraron registros en esa fecha." << endl;
+    } else {
+        cout << "Total de registros encontrados: " << cantidad << endl;
+    }
+}
+
 int main() {
     //creamos nuestras estructuras
     Queue<Log> queue;
@@ -87,5 +111,22 @@ int main() {
         cout << "Error: hay registros desordenados" << endl;
     }
 
+    int anio, dia;
+    string mes;
+
+    cout << "\nBUSQUEDA POR DIA" << endl;
+
+    cout << "Ingresa el anio: ";
+    cin >> anio;
+
+    cout << "Ingresa el mes (Jan, Feb, Mar...): ";
+    cin >> mes;
+
+    cout << "Ingresa el dia: ";
+    cin >> dia;
+
+    //buscamos los registros de esa fecha
+    buscarPorDia(logs, anio, mes, dia);
+    
     return 0;
 }
