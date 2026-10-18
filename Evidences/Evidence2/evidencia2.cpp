@@ -142,84 +142,125 @@ void mostrarEstadisticas(DoublyLinkedList<Log>& logs) {
     }
 }
 
+
 int main() {
     //creamos nuestras estructuras
     Queue<Log> queue;
     DoublyLinkedList<Log> logs;
-    //archivos que vamos a leer
-    string archivos[2] = {
-    "log607-1.txt",
-    "log607-2.txt"
-    };
-    //recorremos los dos archivos
-    for (int i = 0; i < 2; i++) {
-        ifstream archivo(archivos[i]);
-        //validamos que el archivo se abra
-        if (!archivo.is_open()) {
-            cout << "Error al abrir el archivo: " << archivos[i] << endl;
-            return 1;
-        }
-        string linea;
 
-        //leemos cada linea
-        while (getline(archivo, linea)) {
-            stringstream ss(linea);
-            string mes, hora, ip, message;
-            int dia, anio;
+    string nombreArchivo;
+    int opcionArchivo;
+    //preguntamos que archivo desea cargar
+    cout << "Selecciona el archivo que deseas cargar:" << endl;
+    cout << "1. log607-1.txt" << endl;
+    cout << "2. log607-2.txt" << endl;
+    cout << "Opcion: ";
+    cin >> opcionArchivo;
 
-            //separamos los datos
-            if (!(ss >> mes >> dia >> anio >> hora >> ip)) {
-                continue;
-            }
-            //leemos el mensaje completo
-            getline(ss, message);
-            //quitamos el espacio inicial del mensaje
-            if (!message.empty() && message[0] == ' ') {
-                message.erase(0, 1);
-            }
-            //creamos un registro
-            Log registro(anio, mes, dia, hora, ip, message);
-            //agregamos el registro a la cola
-            queue.enqueue(registro);
-        }
-
-        archivo.close();
+    if (opcionArchivo == 1) {
+        nombreArchivo = "log607-1.txt";
+    } else if (opcionArchivo == 2) {
+        nombreArchivo = "log607-2.txt";
+    } else {
+        cout << "Opcion no valida." << endl;
+        return 1;
     }
 
-    //mostramos cuantos registros se leyeron
-    cout << "Registros leidos: " << queue.getSize() << endl;
-    //pasamos los registros a la lista doblemente enlazada
-    while (queue.getSize() != 0) {
+    //abrimos el archivo seleccionado
+    ifstream archivo(nombreArchivo);
+    if (!archivo.is_open()) {
+        cout << "Error al abrir el archivo: " << nombreArchivo << endl;
+        return 1;
+    }
+
+    string linea;
+    int omitidas = 0;
+    //leemos cada linea
+    while (getline(archivo, linea)) {
+        stringstream ss(linea);
+        string mes, hora, ip, message;
+        int dia, anio;
+
+        //separamos los datos
+        if (!(ss >> mes >> dia >> anio >> hora >> ip)) {
+            omitidas++;
+            continue;
+        }
+        //leemos el mensaje completo
+        getline(ss, message);
+        if (!message.empty() && message[0] == ' ') {
+            message.erase(0, 1);
+        }
+        //creamos un registro
+        Log registro(anio, mes, dia, hora, ip, message);
+        queue.enqueue(registro);
+    }
+
+    archivo.close();
+    //pasamos los registros a la lista
+    while (!queue.isEmpty()) {
         Log registro = queue.dequeue();
         logs.addLast(registro);
     }
 
-    //mostramos el total de registros
-    cout << "Registros en la lista: " << logs.getSize() << endl;
+    cout << "\nArchivo cargado: " << nombreArchivo << endl;
+    cout << "Registros cargados: " << logs.getSize() << endl;
+    cout << "Lineas omitidas: " << omitidas << endl;
+    int opcion = 0;
+    bool ordenado = false;
 
-    logs.mergeSort();
+    //mostramos el menu hasta que el usuario decida salir
+    do {
+        cout << "\n---------- Menu ----------" << endl;
+        cout << "1. Ordenar por fecha y hora" << endl;
+        cout << "2. Buscar logs por dia" << endl;
+        cout << "3. Mostrar logs en orden descendente" << endl;
+        cout << "4. Estadisticas del archivo" << endl;
+        cout << "5. Salir" << endl;
+        cout << "Selecciona una opcion: ";
+        cin >> opcion;
 
-    cout << "Registros ordenados: " << logs.getSize() << endl;
-    cout << "Primer registro: " << logs.getData(0).key << endl;
-    cout << "Ultimo registro: " << logs.getData(logs.getSize() - 1).key << endl;
+        if (opcion == 1) {
+            if (ordenado) {
+                cout << "Los registros ya estan ordenados." << endl;
+            } else {
+                //ordenamos los registros
+                logs.mergeSort();
+                ordenado = true;
 
-    int anio, dia;
-    string mes;
-    cout << "\nBusqueda por dia" << endl;
-    cout << "Ingresa el anio: ";
-    cin >> anio;
-    cout << "Ingresa el mes (Jan, Feb, Mar...): ";
-    cin >> mes;
-    cout << "Ingresa el dia: ";
-    cin >> dia;
-    //buscamos los registros de esa fecha
-    buscarPorDia(logs, anio, mes, dia);
-    //mostramos los registros en orden inverso
-    //cout << "\nRegistros en orden inverso:" << endl;
-    //mostrarInverso(logs);
+                cout << "Registros ordenados correctamente." << endl;
+                cout << "Total: " << logs.getSize() << endl;
+            }
+        } else if (opcion == 2) {
+            if (!ordenado) {
+                cout << "Primero debes ordenar los registros con la opcion 1." << endl;
+            } else {
+                int anio, dia;
+                string mes;
 
-    //mostramos las estadisticas
-    mostrarEstadisticas(logs);
+                cout << "Ingresa el anio: ";
+                cin >> anio;
+                cout << "Ingresa el mes (Jan, Feb, Mar...): ";
+                cin >> mes;
+                cout << "Ingresa el dia: ";
+                cin >> dia;
 
-return 0;
+                buscarPorDia(logs, anio, mes, dia);
+            }
+        } else if (opcion == 3) {
+            if (!ordenado) {
+                cout << "Primero debes ordenar los registros con la opcion 1." << endl;
+            } else {
+                cout << "\nRegistros en orden inverso:" << endl;
+                mostrarInverso(logs);
+            }
+        } else if (opcion == 4) {
+            mostrarEstadisticas(logs);
+        } else if (opcion == 5) {
+            cout << "El programa finalizo" << endl;
+        } else {
+            cout << "Opcion no valida." << endl;
+        }
+    } while (opcion != 5);
+    return 0;
 }
