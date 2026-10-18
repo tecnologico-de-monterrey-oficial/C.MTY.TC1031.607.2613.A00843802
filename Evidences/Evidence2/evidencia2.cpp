@@ -139,6 +139,22 @@ void mostrarEstadisticas(DoublyLinkedList<Log>& logs) {
     }
 }
 
+void guardarArchivo(DoublyLinkedList<Log>& logs) {
+    //creamos el archivo de salida
+    ofstream salida("output608.out");
+    if (!salida.is_open()) {
+        cout << "Error al crear el archivo de salida." << endl;
+        return;
+    }
+    //guardamos los registros ordenados
+    for (int i = 0; i < logs.getSize(); i++) {
+        Log registro = logs.getData(i);
+        salida << registro.month << " " << registro.day << " " << registro.year << " " << registro.time << " " << registro.ip << " " << registro.message << endl;
+    }
+    salida.close();
+    cout << "Archivo output608.out generado correctamente." << endl;
+}
+
 
 int main() {
     //creamos nuestras estructuras
@@ -234,6 +250,8 @@ int main() {
                 auto fin = chrono::high_resolution_clock::now();
                 chrono::duration<double, milli> tiempo = fin - inicio;
                 ordenado = true;
+                //guardamos los registros ordenados
+                guardarArchivo(logs);
 
                 //mostramos los resultados
                 cout << "\nResultados del ordenamiento:" << endl;
