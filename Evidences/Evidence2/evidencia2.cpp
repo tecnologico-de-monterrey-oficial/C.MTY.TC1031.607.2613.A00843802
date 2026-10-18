@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <map>
 #include "Queue.h"
 #include "DoublyLinkedList.h"
 #include "Stack.h"
@@ -47,6 +48,97 @@ void mostrarInverso(DoublyLinkedList<Log>& logs) {
     while (!stack.isEmpty()) {
         Log registro = stack.pop();
         cout << registro.month << " " << registro.day << " " << registro.year << " " << registro.time << " " << registro.ip << " " << registro.message << endl;
+    }
+}
+
+void mostrarEstadisticas(DoublyLinkedList<Log>& logs) {
+    //creamos mapas para contar los registros
+    map<string, int> dias;
+    map<string, int> eventos;
+    map<string, int> ips;
+
+    //recorremos todos los registros
+    for (int i = 0; i < logs.getSize(); i++) {
+        Log registro = logs.getData(i);
+
+        //guardamos la fecha completa
+        string fecha = registro.month + " " +
+                       to_string(registro.day) + " " +
+                       to_string(registro.year);
+
+        //contamos las apariciones
+        dias[fecha]++;
+        eventos[registro.message]++;
+        ips[registro.ip]++;
+    }
+
+    //buscamos las cantidades mayores
+    int mayorDia = 0;
+    int mayorEvento = 0;
+    int mayorIP = 0;
+
+    for (auto dato : dias) {
+        if (dato.second > mayorDia) {
+            mayorDia = dato.second;
+        }
+    }
+
+    for (auto dato : eventos) {
+        if (dato.second > mayorEvento) {
+            mayorEvento = dato.second;
+        }
+    }
+
+    for (auto dato : ips) {
+        if (dato.second > mayorIP) {
+            mayorIP = dato.second;
+        }
+    }
+
+    //mostramos las estadisticas
+    cout << "\nEstadisticas del archivo:" << endl;
+    cout << "Total de registros: " << logs.getSize() << endl;
+
+    //mostramos el dia con mas incidentes
+    cout << "\nDia con mas incidentes:" << endl;
+
+    if (mayorDia == 0) {
+        cout << "No hay registros." << endl;
+    } else {
+        for (auto dato : dias) {
+            if (dato.second == mayorDia) {
+                cout << dato.first << ": "
+                     << dato.second << " incidentes" << endl;
+            }
+        }
+    }
+
+    //mostramos el evento mas frecuente
+    cout << "\nTipo de evento mas frecuente:" << endl;
+
+    if (mayorEvento == 0) {
+        cout << "No hay registros." << endl;
+    } else {
+        for (auto dato : eventos) {
+            if (dato.second == mayorEvento) {
+                cout << dato.first << ": "
+                     << dato.second << " apariciones" << endl;
+            }
+        }
+    }
+
+    //mostramos la ip mas frecuente
+    cout << "\nDireccion IP mas frecuente:" << endl;
+
+    if (mayorIP == 0) {
+        cout << "No hay registros." << endl;
+    } else {
+        for (auto dato : ips) {
+            if (dato.second == mayorIP) {
+                cout << dato.first << ": "
+                     << dato.second << " apariciones" << endl;
+            }
+        }
     }
 }
 
@@ -122,10 +214,12 @@ int main() {
     cin >> dia;
     //buscamos los registros de esa fecha
     buscarPorDia(logs, anio, mes, dia);
-
     //mostramos los registros en orden inverso
-    cout << "\nRegistros en orden inverso:" << endl;
-    mostrarInverso(logs);
-    
-    return 0;
+    //cout << "\nRegistros en orden inverso:" << endl;
+    //mostrarInverso(logs);
+
+    //mostramos las estadisticas
+    mostrarEstadisticas(logs);
+
+return 0;
 }
