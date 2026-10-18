@@ -1,9 +1,6 @@
 //Isis Krystal Agramón Leal
 //A00843802
 
-//Isis Krystal Agramón Leal
-//A00843802
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -69,6 +66,26 @@ int main() {
 
     //mostramos el total de registros
     cout << "Registros en la lista: " << logs.getSize() << endl;
+
+    logs.mergeSort();
+
+    cout << "Registros ordenados: " << logs.getSize() << endl;
+    cout << "Primer registro: " << logs.getData(0).key << endl;
+    cout << "Ultimo registro: " << logs.getData(logs.getSize() - 1).key << endl;
+
+    bool ordenado = true;
+    for (int i = 1; i < logs.getSize(); i++) {
+        if (logs.getData(i).key < logs.getData(i - 1).key) {
+            ordenado = false;
+            break;
+        }
+    }
+
+    if (ordenado) {
+        cout << "Todos los registros estan ordenados correctamente" << endl;
+    } else {
+        cout << "Error: hay registros desordenados" << endl;
+    }
 
     return 0;
 }

@@ -16,6 +16,8 @@ private:
     NodeD<T>* head;
     NodeD<T>* tail;
     int size = 0;
+    NodeD<T>* mergeSort(NodeD<T>* inicio);
+    NodeD<T>* merge(NodeD<T>* izquierda, NodeD<T>* derecha);
 
 public:
     DoublyLinkedList() : head(nullptr), tail(nullptr), size(0) {}
@@ -37,6 +39,7 @@ public:
     int getSize();
     void printReverse();
     bool deleteNode(NodeD<T>* node);
+    void mergeSort();
 };
 
 template <typename T>
@@ -401,13 +404,86 @@ bool DoublyLinkedList<T>::deleteNode(NodeD<T>* node) {
     //borramos un elemento de en medio
     node->prev->next = node->next;
     node->next->prev = node->prev;
-
     //liberamos el nodo
     delete node;
-
     //decrementamos size
     size--;
     return true;
+}
+
+template <typename T>
+void DoublyLinkedList<T>::mergeSort() {
+    //validamos si la lista tiene elementos suficientes
+    if (head == nullptr || head->next == nullptr) {
+        return;
+    }
+
+    //ordenamos la lista
+    head = mergeSort(head);
+
+    //actualizamos tail
+    tail = head;
+    while (tail->next != nullptr) {
+        tail = tail->next;
+    }
+}
+
+template <typename T>
+NodeD<T>* DoublyLinkedList<T>::mergeSort(NodeD<T>* inicio) {
+    //validamos si llegamos al caso base
+    if (inicio == nullptr || inicio->next == nullptr) {
+        return inicio;
+    }
+
+    //buscamos la mitad de la lista
+    NodeD<T>* lento = inicio;
+    NodeD<T>* rapido = inicio->next;
+
+    while (rapido != nullptr && rapido->next != nullptr) {
+        lento = lento->next;
+        rapido = rapido->next->next;
+    }
+
+    //dividimos la lista en dos partes
+    NodeD<T>* derecha = lento->next;
+    lento->next = nullptr;
+    derecha->prev = nullptr;
+
+    //ordenamos ambas mitades
+    NodeD<T>* izquierda = mergeSort(inicio);
+    derecha = mergeSort(derecha);
+
+    //unimos las mitades ordenadas
+    return merge(izquierda, derecha);
+}
+
+template <typename T>
+NodeD<T>* DoublyLinkedList<T>::merge(NodeD<T>* izquierda, NodeD<T>* derecha) {
+    //validamos si alguna mitad está vacía
+    if (izquierda == nullptr) {
+        return derecha;
+    }
+    if (derecha == nullptr) {
+        return izquierda;
+    }
+
+    NodeD<T>* resultado = nullptr;
+
+    //comparamos los datos de ambas mitades
+    if (derecha->data < izquierda->data) {
+        resultado = derecha;
+        resultado->next = merge(izquierda, derecha->next);
+    } else {
+        resultado = izquierda;
+        resultado->next = merge(izquierda->next, derecha);
+    }
+
+    //actualizamos los apuntadores prev
+    if (resultado->next != nullptr) {
+        resultado->next->prev = resultado;
+    }
+    resultado->prev = nullptr;
+    return resultado;
 }
 
 
