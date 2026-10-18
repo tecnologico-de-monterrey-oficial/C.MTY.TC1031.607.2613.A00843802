@@ -42,17 +42,39 @@ void buscarPorDia(DoublyLinkedList<Log>& logs, int anio, string mes, int dia) {
     }
 }
 
-void mostrarInverso(DoublyLinkedList<Log>& logs) {
-    //creamos un stack para guardar los registros
+void mostrarInverso(DoublyLinkedList<Log>& logs, int anio, string mes, int dia) {
+    //creamos un stack para guardar los registros del dia
     Stack<Log> stack;
-    //agregamos los registros al stack
+    //creamos la fecha que queremos buscar
+    Log buscado(anio, mes, dia, "00:00:00", "", "");
+    //recorremos los registros ordenados
     for (int i = 0; i < logs.getSize(); i++) {
-        stack.push(logs.getData(i));
+        Log registro = logs.getData(i);
+        //si pasamos de la fecha, dejamos de buscar
+        if (registro.key.substr(0, 8) > buscado.key.substr(0, 8)) {
+            break;
+        }
+        //guardamos solamente los registros del dia
+        if (registro.year == anio && registro.month == mes && registro.day == dia) {
+            stack.push(registro);
+        }
+}
+
+    //validamos si encontramos registros
+    if (stack.isEmpty()) {
+        cout << "No se encontraron registros en esa fecha." << endl;
+        return;
     }
-    //mostramos los registros en orden inverso
+
+    cout << "\nRegistros en orden descendente:" << endl;
+
+    //mostramos los registros desde el mas reciente
     while (!stack.isEmpty()) {
         Log registro = stack.pop();
-        cout << registro.month << " " << registro.day << " " << registro.year << " " << registro.time << " " << registro.ip << " " << registro.message << endl;
+
+        cout << registro.month << " " << registro.day << " "
+             << registro.year << " " << registro.time << " "
+             << registro.ip << " " << registro.message << endl;
     }
 }
 
@@ -221,6 +243,11 @@ int main() {
     cout << "Lineas omitidas: " << omitidas << endl;
     int opcion = 0;
     bool ordenado = false;
+    //guardamos la fecha de la ultima busqueda
+    int ultimoAnio = 0;
+    int ultimoDia = 0;
+    string ultimoMes = "";
+    bool hayBusqueda = false;
 
     //mostramos el menu hasta que el usuario decida salir
     do {
@@ -271,26 +298,40 @@ int main() {
                 }
                             }
         } else if (opcion == 2) {
-            if (!ordenado) {
-                cout << "Primero debes ordenar los registros con la opcion 1." << endl;
-            } else {
-                int anio, dia;
-                string mes;
-                cout << "Ingresa el anio: ";
-                cin >> anio;
-                cout << "Ingresa el mes (Jan, Feb, Mar...): ";
-                cin >> mes;
-                cout << "Ingresa el dia: ";
-                cin >> dia;
-                buscarPorDia(logs, anio, mes, dia);
-            }
+        if (!ordenado) {
+            cout << "Primero debes ordenar los registros con la opcion 1." << endl;
+        } else {
+            int anio, dia;
+            string mes;
+            cout << "Ingresa el anio: ";
+            cin >> anio;
+            cout << "Ingresa el mes (Jan, Feb, Mar...): ";
+            cin >> mes;
+            cout << "Ingresa el dia: ";
+            cin >> dia;
+            buscarPorDia(logs, anio, mes, dia);
+            //guardamos la fecha para utilizarla despues
+            ultimoAnio = anio;
+            ultimoMes = mes;
+            ultimoDia = dia;
+            hayBusqueda = true;
+        }
         } else if (opcion == 3) {
             if (!ordenado) {
                 cout << "Primero debes ordenar los registros con la opcion 1." << endl;
             } else {
-                cout << "\nRegistros en orden inverso:" << endl;
-                mostrarInverso(logs);
-            }
+                //si no hemos buscado antes, pedimos la fecha
+                if (!hayBusqueda) {
+                    cout << "Ingresa el anio: ";
+                    cin >> ultimoAnio;
+                    cout << "Ingresa el mes (Jan, Feb, Mar...): ";
+                    cin >> ultimoMes;
+                    cout << "Ingresa el dia: ";
+                    cin >> ultimoDia;
+                    hayBusqueda = true;
+                }
+                mostrarInverso(logs, ultimoAnio, ultimoMes, ultimoDia);
+                }
         } else if (opcion == 4) {
             mostrarEstadisticas(logs);
         } else if (opcion == 5) {
