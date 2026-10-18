@@ -14,23 +14,27 @@
 using namespace std;
 
 void buscarPorDia(DoublyLinkedList<Log>& logs, int anio, string mes, int dia) {
-    //variable para saber si encontramos registros
-    bool encontrado = false;
+    //variable para contar los registros encontrados
     int cantidad = 0;
-
-    //recorremos los registros
+    //creamos la fecha que queremos buscar
+    Log buscado(anio, mes, dia, "00:00:00", "", "");
+    //recorremos los registros ordenados
     for (int i = 0; i < logs.getSize(); i++) {
         Log registro = logs.getData(i);
+
+        //si pasamos de la fecha, dejamos de buscar
+        if (registro.key.substr(0, 8) > buscado.key.substr(0, 8)) {
+            break;
+        }
         //comparamos la fecha
         if (registro.year == anio && registro.month == mes && registro.day == dia) {
-            //mostramos el registro encontrado
-            cout << registro.month << " " << registro.day << " " << registro.year << " " << registro.time << " " << registro.ip << " " << registro.message << endl;
-            encontrado = true;
+            cout << registro.month << " " << registro.day << " "
+                 << registro.year << " " << registro.time << " "
+                 << registro.ip << " " << registro.message << endl;
             cantidad++;
         }
     }
-    //mostramos los resultados
-    if (!encontrado) {
+    if (cantidad == 0) {
         cout << "No se encontraron registros en esa fecha." << endl;
     } else {
         cout << "Total de registros encontrados: " << cantidad << endl;
