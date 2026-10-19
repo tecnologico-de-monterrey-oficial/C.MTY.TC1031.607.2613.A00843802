@@ -7,6 +7,8 @@
 #include <string>
 #include <map>
 #include <chrono>
+#include <limits>
+#include <cctype>
 #include "Queue.h"
 #include "DoublyLinkedList.h"
 #include "Stack.h"
@@ -210,78 +212,120 @@ void guardarArchivo(DoublyLinkedList<Log>& logs) {
 }
 
 
+
+//leemos numeros completos sin dejar errores en cin
+bool leerNumero(const string& mensaje, int& numero) {
+    string entrada;
+    cout << mensaje;
+    if (!getline(cin, entrada)) return false;
+    stringstream ss(entrada);
+    char extra;
+    return (ss >> numero) && !(ss >> extra);
+}
+
+bool leerFecha(int& anio, string& mes, int& dia) {
+    if (!leerNumero("Ingresa el anio: ", anio)) return false;
+    cout << "Ingresa el mes (Jan, Feb, Mar...): ";
+    if (!getline(cin, mes)) return false;
+    if (!leerNumero("Ingresa el dia: ", dia)) return false;
+    return fechaValida(anio, mes, dia);
+}
+
+bool horaValida(const string& hora) {
+    if (hora.size() != 8 || hora[2] != ':' || hora[5] != ':') return false;
+    for (int i = 0; i < 8; i++) {
+        if (i != 2 && i != 5 && !isdigit(static_cast<unsigned char>(hora[i]))) return false;
+    }
+    int h = stoi(hora.substr(0, 2));
+    int m = stoi(hora.substr(3, 2));
+    int s = stoi(hora.substr(6, 2));
+    return h < 24 && m < 60 && s < 60;
+}
+
+bool validarLinea(const string& linea, int& anio, string& mes, int& dia,
+                  string& hora, string& ip, string& mensaje, string& motivo) {
+    stringstream ss(linea);
+    if (!(ss >> mes >> dia >> anio >> hora >> ip)) {
+        motivo = "faltan datos o la fecha tiene un formato incorrecto";
+        return false;
+    }
+    getline(ss, mensaje);
+    size_t inicio = mensaje.find_first_not_of(" \t\r");
+    if (inicio == string::npos) mensaje.clear();
+    else mensaje.erase(0, inicio);
+
+    if (!fechaValida(anio, mes, dia)) {
+        motivo = "fecha no valida";
+        return false;
+    }
+    if (!horaValida(hora)) {
+        motivo = "hora no valida";
+        return false;
+    }
+    if (ip.empty() || mensaje.empty()) {
+        motivo = "falta la IP o el mensaje";
+        return false;
+    }
+    return true;
+}
+
 int main() {
     //creamos nuestras estructuras
-    Queue<Log> queue;
+    Queue<string> queue;
     DoublyLinkedList<Log> logs;
 
-    string nombreArchivo;
     int opcionArchivo;
-    //preguntamos que archivo desea cargar
-    cout << "Selecciona el archivo que deseas cargar:" << endl;
-    cout << "1. log607-1.txt" << endl;
-    cout << "2. log607-2.txt" << endl;
-    cout << "Opcion: ";
-    cin >> opcionArchivo;
-
-    if (opcionArchivo == 1) {
-        nombreArchivo = "log607-1.txt";
-    } else if (opcionArchivo == 2) {
-        nombreArchivo = "log607-2.txt";
-    } else {
+    if (!leerNumero("Selecciona el archivo que deseas cargar:\n1. log607-1.txt\n2. log607-2.txt\nOpcion: ", opcionArchivo)) {
         cout << "Opcion no valida." << endl;
         return 1;
     }
 
-    //abrimos el archivo seleccionado
+    string nombreArchivo;
+    if (opcionArchivo == 1) nombreArchivo = "log607-1.txt";
+    else if (opcionArchivo == 2) nombreArchivo = "log607-2.txt";
+    else {
+        cout << "Opcion no valida." << endl;
+        return 1;
+    }
+
     ifstream archivo(nombreArchivo);
     if (!archivo.is_open()) {
         cout << "Error al abrir el archivo: " << nombreArchivo << endl;
         return 1;
     }
 
+    //primero guardamos todas las lineas en Queue
     string linea;
-    int omitidas = 0;
-    //leemos cada linea
-    while (getline(archivo, linea)) {
-        stringstream ss(linea);
-        string mes, hora, ip, message;
-        int dia, anio;
+    while (getline(archivo, linea)) queue.enqueue(linea);
+    archivo.close();
 
-        //separamos los datos
-        if (!(ss >> mes >> dia >> anio >> hora >> ip)) {
+    //despues sacamos cada linea, la validamos y la agregamos a la lista
+    int omitidas = 0;
+    int numeroLinea = 0;
+    while (!queue.isEmpty()) {
+        linea = queue.dequeue();
+        numeroLinea++;
+        string mes, hora, ip, mensaje, motivo;
+        int dia, anio;
+        if (!validarLinea(linea, anio, mes, dia, hora, ip, mensaje, motivo)) {
             omitidas++;
+            cout << "Linea " << numeroLinea << " omitida: " << motivo << endl;
             continue;
         }
-        //leemos el mensaje completo
-        getline(ss, message);
-        if (!message.empty() && message[0] == ' ') {
-            message.erase(0, 1);
-        }
-        //creamos un registro
-        Log registro(anio, mes, dia, hora, ip, message);
-        queue.enqueue(registro);
-    }
-
-    archivo.close();
-    //pasamos los registros a la lista
-    while (!queue.isEmpty()) {
-        Log registro = queue.dequeue();
+        Log registro(anio, mes, dia, hora, ip, mensaje);
         logs.addLast(registro);
     }
 
     cout << "\nArchivo cargado: " << nombreArchivo << endl;
     cout << "Registros cargados: " << logs.getSize() << endl;
     cout << "Lineas omitidas: " << omitidas << endl;
+
     int opcion = 0;
     bool ordenado = false;
-    //guardamos la fecha de la ultima busqueda
-    int ultimoAnio = 0;
-    int ultimoDia = 0;
+    int ultimoAnio = 0, ultimoDia = 0;
     string ultimoMes = "";
     bool hayBusqueda = false;
 
-    //mostramos el menu hasta que el usuario decida salir
     do {
         cout << "\n---------- Menu ----------" << endl;
         cout << "1. Ordenar por fecha y hora" << endl;
@@ -289,30 +333,30 @@ int main() {
         cout << "3. Mostrar logs en orden descendente" << endl;
         cout << "4. Estadisticas del archivo" << endl;
         cout << "5. Salir" << endl;
-        cout << "Selecciona una opcion: ";
-        cin >> opcion;
+
+        if (!leerNumero("Selecciona una opcion: ", opcion)) {
+            if (cin.eof()) break;
+            cout << "Opcion no valida. Escribe un numero del 1 al 5." << endl;
+            continue;
+        }
 
         if (opcion == 1) {
             if (ordenado) {
                 cout << "Los registros ya estan ordenados." << endl;
             } else {
-                //preguntamos la prediccion
                 int prediccion;
-                cout << "Predice el crecimiento de comparaciones:" << endl;
-                cout << "1. n log n" << endl;
-                cout << "2. n^2" << endl;
-                cout << "Opcion: ";
-                cin >> prediccion;
-                //medimos el tiempo del ordenamiento
+                if (!leerNumero("Predice el crecimiento de comparaciones:\n1. n log n\n2. n^2\nOpcion: ", prediccion)
+                    || (prediccion != 1 && prediccion != 2)) {
+                    cout << "Prediccion no valida. Intenta nuevamente." << endl;
+                    continue;
+                }
                 auto inicio = chrono::high_resolution_clock::now();
                 logs.mergeSort();
                 auto fin = chrono::high_resolution_clock::now();
                 chrono::duration<double, milli> tiempo = fin - inicio;
                 ordenado = true;
-                //guardamos los registros ordenados
                 guardarArchivo(logs);
 
-                //mostramos los resultados
                 cout << "\nResultados del ordenamiento:" << endl;
                 cout << "Algoritmo: Merge Sort" << endl;
                 cout << "Archivo: " << nombreArchivo << endl;
@@ -320,60 +364,40 @@ int main() {
                 cout << "Tiempo: " << tiempo.count() << " ms" << endl;
                 cout << "Comparaciones: " << logs.getComparaciones() << endl;
                 cout << "Profundidad maxima: " << logs.getProfundidadMaxima() << endl;
-
-                if (prediccion == 1) {
+                if (prediccion == 1)
                     cout << "Tu prediccion coincide con el crecimiento esperado de Merge Sort." << endl;
-                } else if (prediccion == 2) {
+                else
                     cout << "Tu prediccion no coincide. Merge Sort tiene crecimiento O(n log n)." << endl;
-                } else {
-                    cout << "Prediccion no valida." << endl;
-                }
-                            }
+            }
         } else if (opcion == 2) {
-        if (!ordenado) {
-            cout << "Primero debes ordenar los registros con la opcion 1." << endl;
-        } else {
-            int anio, dia;
-            string mes;
-            cout << "Ingresa el anio: ";
-            cin >> anio;
-            cout << "Ingresa el mes (Jan, Feb, Mar...): ";
-            cin >> mes;
-            cout << "Ingresa el dia: ";
-            cin >> dia;
-           if (!fechaValida(anio, mes, dia)) {
-                cout << "Fecha no valida. Intenta nuevamente." << endl;
+            if (!ordenado) {
+                cout << "Primero debes ordenar los registros con la opcion 1." << endl;
             } else {
-                buscarPorDia(logs, anio, mes, dia);
-
-                //guardamos la fecha para utilizarla despues
-                ultimoAnio = anio;
-                ultimoMes = mes;
-                ultimoDia = dia;
-                hayBusqueda = true;
+                int anio, dia;
+                string mes;
+                if (!leerFecha(anio, mes, dia)) {
+                    cout << "Fecha no valida. Intenta nuevamente." << endl;
+                } else {
+                    buscarPorDia(logs, anio, mes, dia);
+                    ultimoAnio = anio;
+                    ultimoMes = mes;
+                    ultimoDia = dia;
+                    hayBusqueda = true;
                 }
             }
         } else if (opcion == 3) {
             if (!ordenado) {
                 cout << "Primero debes ordenar los registros con la opcion 1." << endl;
             } else {
-                //si no hemos buscado antes, pedimos la fecha
                 if (!hayBusqueda) {
-                    cout << "Ingresa el anio: ";
-                    cin >> ultimoAnio;
-                    cout << "Ingresa el mes (Jan, Feb, Mar...): ";
-                    cin >> ultimoMes;
-                    cout << "Ingresa el dia: ";
-                    cin >> ultimoDia;
+                    if (!leerFecha(ultimoAnio, ultimoMes, ultimoDia)) {
+                        cout << "Fecha no valida. Intenta nuevamente." << endl;
+                        continue;
+                    }
                     hayBusqueda = true;
                 }
-                if (!fechaValida(ultimoAnio, ultimoMes, ultimoDia)) {
-                    cout << "Fecha no valida. Intenta nuevamente." << endl;
-                    hayBusqueda = false;
-                } else {
-                    mostrarInverso(logs, ultimoAnio, ultimoMes, ultimoDia);
-                }
-                }
+                mostrarInverso(logs, ultimoAnio, ultimoMes, ultimoDia);
+            }
         } else if (opcion == 4) {
             mostrarEstadisticas(logs);
         } else if (opcion == 5) {
