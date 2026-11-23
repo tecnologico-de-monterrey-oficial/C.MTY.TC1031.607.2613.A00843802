@@ -1,6 +1,6 @@
 
- // Isis Krystal Agramón Leal
-// A00843802
+ //Isis Krystal Agramón Leal
+//A00843802
 
 #ifndef Log_h
 #define Log_h
@@ -108,14 +108,14 @@ string Log::createKey() {
 
     timeNumber = time.substr(0,2) + time.substr(3,2) + time.substr(6,2);
 
-    // separamos los numeros de la IP
+    //separamos los numeros de la IP
     stringstream ss(ip);
     string number;
 
     for (int i = 0; i < 4; i++){
         getline(ss, number, '.');
 
-        // convertimos el numero a tres digitos
+        //convertimos el numero a tres digitos
         int octet = stoi(number);
         number = to_string(octet);
 
@@ -126,7 +126,7 @@ string Log::createKey() {
         ipNumber = ipNumber + number;
     }
 
-    // creamos la llave con IP, fecha, hora y mensaje
+    //creamos la llave con IP, fecha, hora y mensaje
     key = ipNumber + to_string(year);
     key = key + monthNumber + dayNumber + timeNumber + message;
 

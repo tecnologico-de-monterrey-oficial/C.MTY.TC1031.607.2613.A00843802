@@ -2,25 +2,32 @@
 //A008483802
 
 #include <iostream>
+#include <fstream>
+#include <string>
+#include "Log3.h"
 #include "Heap3.h"
+#include "BST3.h"
 
 using namespace std;
 
-int main() {
-    Heap<int> heap{less<int>()};
+int main(){
+    ifstream archivo("log607-3.json");
 
-    heap.push(30);
-    heap.push(10);
-    heap.push(50);
-    heap.push(20);
+    if(archivo.is_open() == false){
+        cout << "Error no se pudo abrir el archivo" << endl;
+        return 1;
+    } else{
+        string linea;
+        int contador = 0;
 
-    cout << "Heap: ";
-    heap.print();
+        while(getline(archivo, linea)){
+            contador++;
+        }
 
-    cout << "Mayor: " << heap.pop() << endl;
+        cout << "Cantidad de lineas: " << contador << endl;
+    }
 
-    cout << "Heap despues de pop: ";
-    heap.print();
+    archivo.close();
 
     return 0;
 }
