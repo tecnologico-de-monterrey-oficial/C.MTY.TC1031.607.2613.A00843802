@@ -108,17 +108,29 @@ int main(){
 
         cout << "Cantidad de registros: " << contador << endl;
 
-        //Comprobar que el Heap contiene registros
-        if(contador > 0){
-            Log primero = registros.pop();
+        //Crear el archivo de salida
+        ofstream salida("registrosOrdenados.txt");
 
-            cout << "IP: " << primero.ip << endl;
-            cout << "Fecha: " << primero.day << "/"
-                 << primero.month << "/"
-                 << primero.year << endl;
-            cout << "Hora: " << primero.time << endl;
-            cout << "Mensaje: " << primero.message << endl;
+        if(salida.is_open() == false){
+            cout << "Error al crear el archivo de salida" << endl;
+            return 1;
         }
+
+        //Extraer los registros del Heap
+        for(int i = 0; i < contador; i++){
+            Log registro = registros.pop();
+
+            salida << registro.ip << " "
+                   << registro.year << " "
+                   << registro.month << " "
+                   << registro.day << " "
+                   << registro.time << " "
+                   << registro.message << endl;
+        }
+
+        salida.close();
+
+        cout << "Registros ordenados correctamente" << endl;
     }
 
     archivo.close();
