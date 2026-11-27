@@ -5,8 +5,11 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <vector> //NUEVO
-#include <limits> //NUEVO
+#include <vector>
+#include <limits>
+#include <chrono>
+#include <functional>
+#include <exception>
 #include "Log3.h"
 #include "Heap3.h"
 #include "BST3.h"
@@ -97,7 +100,6 @@ bool validarIP(string ip){
     return contador == 4;
 }
 
-//NUEVO
 //Validar la fecha del registro
 bool validarFecha(string month, int day, int year){
     string meses[12] = {
@@ -131,7 +133,6 @@ bool validarFecha(string month, int day, int year){
     return false;
 }
 
-//NUEVO
 //Validar la hora del registro
 bool validarHora(string time){
     if(time.length() != 8){
@@ -160,7 +161,6 @@ bool validarHora(string time){
            segundo >= 0 && segundo <= 59;
 }
 
-//NUEVO
 //Validar todos los campos del registro
 string validarRegistro(string month, string day,
                        string year, string time,
@@ -209,14 +209,278 @@ string validarRegistro(string month, string day,
     return "";
 }
 
-//NUEVO
+//Verificar el orden de dos registros
+bool verificarOrden(const Log &anterior,
+                    const Log &actual, int tipo){
+
+    //Orden descendente
+    if(tipo == 1){
+        return !(anterior < actual);
+    }
+
+    //Orden ascendente
+    if(tipo == 2){
+        return !(anterior > actual);
+    }
+
+    return false;
+}
+
+//Realizar el ordenamiento de los registros
+void ordenarRegistros(const vector<Log>& registrosValidos,
+                      int tipo){
+
+    if(registrosValidos.empty()){
+        cout << "No hay registros para ordenar" << endl;
+        return;
+    }
+
+    //Determinar el tipo de ordenamiento
+    string nombreArchivo;
+
+    function<bool(const Log&, const Log&)> comparador;
+
+    if(tipo == 1){
+        comparador = greater<Log>();
+        nombreArchivo = "output608-1.out";
+
+        cout << "Ordenamiento descendente" << endl;
+    } else{
+        comparador = less<Log>();
+        nombreArchivo = "output608-2.out";
+
+        cout << "Ordenamiento ascendente" << endl;
+    }
+
+    //Solicitar una prediccion al usuario
+    int prediccion;
+
+    cout << endl;
+    cout << "Si duplicamos la cantidad de registros, que pasara con las comparaciones?" << endl;
+    cout << "1. Aproximadamente las mismas" << endl;
+    cout << "2. Aproximadamente el doble" << endl;
+    cout << "3. Un poco mas del doble" << endl;
+    cout << "4. Cuatro veces mas" << endl;
+    cout << "Ingresa tu prediccion: ";
+
+    while(!(cin >> prediccion) || prediccion < 1 || prediccion > 4){
+        if(cin.eof()){
+            return;
+        }
+
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        cout << "Prediccion no valida" << endl;
+        cout << "Ingresa tu prediccion: ";
+    }
+
+    //Crear el Heap
+    Heap<Log> registros(comparador);
+
+    //Iniciar la medicion del tiempo
+    auto inicio = chrono::steady_clock::now();
+
+    //Insertar los registros validos
+    for(int i = 0; i < registrosValidos.size(); i++){
+        registros.push(registrosValidos[i]);
+    }
+
+    //Obtener la altura antes de las extracciones
+    int altura = registros.height();
+
+    //Obtener las comparaciones de las inserciones
+    long long comparacionesInsercion =
+        registros.getComparisons();
+
+    auto finInsercion = chrono::steady_clock::now();
+
+    double tiempoInsercion =
+        chrono::duration<double, milli>(
+            finInsercion - inicio).count();
+
+    //Guardar los registros ordenados
+    vector<Log> registrosOrdenados;
+    registrosOrdenados.reserve(registrosValidos.size());
+
+    //Extraer los registros del Heap
+    while(!registros.empty()){
+        registrosOrdenados.push_back(registros.pop());
+    }
+
+    //Finalizar la medicion del tiempo
+    auto fin = chrono::steady_clock::now();
+
+    double tiempo =
+        chrono::duration<double, milli>(
+            fin - inicio).count();
+
+    //Obtener la cantidad total de comparaciones
+    long long comparaciones = registros.getComparisons();
+
+    //Verificar el ordenamiento
+    bool ordenCorrecto = true;
+
+    for(int i = 1; i < registrosOrdenados.size(); i++){
+        if(!verificarOrden(registrosOrdenados[i - 1],
+                           registrosOrdenados[i], tipo)){
+            ordenCorrecto = false;
+        }
+    }
+
+    //Crear el archivo de salida
+    ofstream salida(nombreArchivo);
+
+    if(!salida.is_open()){
+        cout << "Error al crear el archivo de salida" << endl;
+        return;
+    }
+
+    //Escribir los registros ordenados
+    for(int i = 0; i < registrosOrdenados.size(); i++){
+        Log registro = registrosOrdenados[i];
+
+        salida << registro.month << " "
+               << registro.day << " "
+               << registro.year << " "
+               << registro.time << " "
+               << registro.ip << " "
+               << registro.message << endl;
+    }
+
+    salida.close();
+
+    //Mostrar los resultados del ordenamiento
+    cout << endl;
+    cout << "Cantidad de registros: "
+         << registrosValidos.size() << endl;
+
+    cout << "Altura del Heap: "
+         << altura << endl;
+
+    cout << "Comparaciones antes de las extracciones: "
+         << comparacionesInsercion << endl;
+
+    cout << "Tiempo antes de las extracciones: "
+         << tiempoInsercion << " ms" << endl;
+
+    cout << "Comparaciones durante las extracciones: "
+         << comparaciones - comparacionesInsercion << endl;
+
+    cout << "Cantidad total de comparaciones: "
+         << comparaciones << endl;
+
+    cout << "Tiempo total de ejecucion: "
+         << tiempo << " ms" << endl;
+
+    if(ordenCorrecto){
+        cout << "Registros ordenados correctamente" << endl;
+    } else{
+        cout << "Error en el ordenamiento" << endl;
+    }
+
+    cout << "Archivo generado: "
+         << nombreArchivo << endl;
+
+    //Crear otro Heap para duplicar los registros
+    Heap<Log> registrosDuplicados(comparador);
+
+    //Iniciar la medicion del tiempo
+    auto inicioDuplicados = chrono::steady_clock::now();
+
+    //Insertar dos veces los registros validos
+    for(int j = 0; j < 2; j++){
+        for(int i = 0; i < registrosValidos.size(); i++){
+            registrosDuplicados.push(registrosValidos[i]);
+        }
+    }
+
+    //Obtener la altura antes de las extracciones
+    int alturaDuplicados = registrosDuplicados.height();
+
+    long long comparacionesInsercionDuplicados =
+        registrosDuplicados.getComparisons();
+
+    auto finInsercionDuplicados =
+        chrono::steady_clock::now();
+
+    double tiempoInsercionDuplicados =
+        chrono::duration<double, milli>(
+            finInsercionDuplicados -
+            inicioDuplicados).count();
+
+    //Extraer los registros duplicados
+    while(!registrosDuplicados.empty()){
+        registrosDuplicados.pop();
+    }
+
+    //Finalizar la medicion del tiempo
+    auto finDuplicados = chrono::steady_clock::now();
+
+    double tiempoDuplicados =
+        chrono::duration<double, milli>(
+            finDuplicados - inicioDuplicados).count();
+
+    //Obtener las comparaciones de los registros duplicados
+    long long comparacionesDuplicados =
+        registrosDuplicados.getComparisons();
+
+    //Mostrar los resultados del experimento
+    cout << endl;
+    cout << "----- REGISTROS DUPLICADOS -----" << endl;
+
+    cout << "Cantidad de registros: "
+         << registrosValidos.size() * 2 << endl;
+
+    cout << "Altura del Heap: "
+         << alturaDuplicados << endl;
+
+    cout << "Comparaciones antes de las extracciones: "
+         << comparacionesInsercionDuplicados << endl;
+
+    cout << "Tiempo antes de las extracciones: "
+         << tiempoInsercionDuplicados << " ms" << endl;
+
+    cout << "Cantidad total de comparaciones: "
+         << comparacionesDuplicados << endl;
+
+    cout << "Tiempo total de ejecucion: "
+         << tiempoDuplicados << " ms" << endl;
+
+    //Comparar los resultados originales y duplicados
+    if(comparaciones > 0){
+        double aumento = static_cast<double>(comparacionesDuplicados)
+                         / comparaciones;
+        cout << "Las comparaciones se multiplicaron por: " << aumento << endl;
+        //Criterio aproximado elegido para clasificar el resultado
+        int resultado;
+        if(aumento < 1.5){
+            resultado = 1;
+        } else if(aumento <= 2.05){
+            resultado = 2;
+        } else if(aumento < 3.5){
+            resultado = 3;
+        } else{
+            resultado = 4;
+        }
+        cout << "Prediccion: " << prediccion << endl;
+        cout << "Categoria experimental: " << resultado << endl;
+        cout << (prediccion == resultado ? "La prediccion fue correcta" :
+                 "La prediccion no fue correcta") << endl;
+    } else{
+        cout << "No se puede calcular la proporcion: cero comparaciones originales" << endl;
+    }
+}
+
 //Mostrar las opciones del programa
 void mostrarMenu(){
     cout << endl;
     cout << "---------- MENU ----------" << endl;
-    cout << "1. Mostrar cantidad de registros" << endl;
-    cout << "2. Consultar direccion IP" << endl;
-    cout << "0. Salir" << endl;
+    cout << "1. Ordenar registros de forma descendente" << endl;
+    cout << "2. Ordenar registros de forma ascendente" << endl;
+    cout << "3. Top 10 de direcciones IP (pendiente)" << endl;
+    cout << "4. Consultar direccion IP" << endl;
+    cout << "5. Salir" << endl;
     cout << "Selecciona una opcion: ";
 }
 
@@ -229,16 +493,18 @@ int main(){
     } else{
         string linea;
         int contador = 0;
-        int invalidos = 0; //NUEVO
+        int invalidos = 0;
+        int numeroLinea = 0;
 
         //Guardar los registros validos
-        vector<Log> registrosValidos; //NUEVO
+        vector<Log> registrosValidos;
 
         //Crear el BST de direcciones IP
         BST<unsigned long long> direccionesIP;
 
         //Leer cada linea del archivo
         while(getline(archivo, linea)){
+            numeroLinea++;
 
             //Ignorar las lineas que no contienen registros
             if(linea.find('{') == string::npos){
@@ -253,13 +519,13 @@ int main(){
             string time = extraerCampo(linea, "time");
             string message = extraerCampo(linea, "message");
 
-            //NUEVO
             //Validar el registro
             string error = validarRegistro(month, day,
                                            year, time,
                                            ip, message);
 
             if(!error.empty()){
+                cout << "Linea " << numeroLinea << ": " << error << endl;
                 invalidos++;
                 continue;
             }
@@ -269,11 +535,11 @@ int main(){
                          time, ip, message);
 
             if(registro.key.length() < 26){
+                cout << "Linea " << numeroLinea << ": Clave no valida" << endl;
                 invalidos++;
                 continue;
             }
 
-            //NUEVO
             //Guardar el registro valido
             registrosValidos.push_back(registro);
 
@@ -287,13 +553,13 @@ int main(){
         archivo.close();
 
         //Mostrar la cantidad de registros
+        cout << "Total de registros leidos: " << contador + invalidos << endl;
         cout << "Cantidad de registros validos: "
              << contador << endl;
 
         cout << "Cantidad de registros invalidos: "
              << invalidos << endl;
 
-        //NUEVO
         //Mostrar el menu
         int opcion;
 
@@ -313,18 +579,25 @@ int main(){
                 continue;
             }
 
-            if(opcion == 0){
+            if(opcion == 5){
                 break;
             }
 
             if(opcion == 1){
-                cout << "Registros validos: "
-                     << registrosValidos.size() << endl;
 
-                cout << "Registros invalidos: "
-                     << invalidos << endl;
+                //Ordenar los registros de forma descendente
+                ordenarRegistros(registrosValidos, 1);
 
             } else if(opcion == 2){
+
+                //Ordenar los registros de forma ascendente
+                ordenarRegistros(registrosValidos, 2);
+
+            } else if(opcion == 3){
+
+                cout << "Top 10 pendiente del commit 17" << endl;
+
+            } else if(opcion == 4){
 
                 //Consultar direcciones IP
                 string ipConsulta;
@@ -342,11 +615,14 @@ int main(){
                 }
 
                 //Buscar la cantidad de apariciones
-                unsigned long long ipNumerica = convertirIP(ipConsulta);
+                unsigned long long ipNumerica =
+                    convertirIP(ipConsulta);
 
-                int cantidad = direccionesIP.getCount(ipNumerica);
+                int cantidad =
+                    direccionesIP.getCount(ipNumerica);
 
                 cout << "IP: " << ipConsulta << endl;
+
                 cout << "Cantidad de apariciones: "
                      << cantidad << endl;
 
