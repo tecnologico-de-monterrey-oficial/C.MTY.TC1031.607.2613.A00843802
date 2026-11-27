@@ -62,6 +62,14 @@ string extraerCampo(string linea, string campo){
     return linea.substr(inicio, fin - inicio);
 }
 
+//Comparar los registros por fecha y hora
+bool compararFecha(const Log &a, const Log &b){
+    string fechaA = a.key.substr(12, 14);
+    string fechaB = b.key.substr(12, 14);
+
+    return fechaA > fechaB;
+}
+
 int main(){
     ifstream archivo("log607-3.json");
 
@@ -72,8 +80,9 @@ int main(){
         string linea;
         int contador = 0;
 
-        //Crear un Heap de registros
+        //Crear los Heaps
         Heap<Log> registros;
+        Heap<Log> registrosFecha(compararFecha);
 
         //Leer cada linea del archivo
         while(getline(archivo, linea)){
@@ -100,23 +109,29 @@ int main(){
             Log registro(stoi(year), month, stoi(day),
                          time, ip, message);
 
-            //Insertar el registro en el Heap
+            if(registro.key.length() < 26){
+                continue;
+            }
+
+            //Insertar el registro en los Heaps
             registros.push(registro);
+            registrosFecha.push(registro);
 
             contador++;
         }
 
         cout << "Cantidad de registros: " << contador << endl;
 
-        //Crear el archivo de salida
+        //Crear los archivos de salida
         ofstream salida("registrosOrdenados.txt");
+        ofstream salidaFecha("registrosPorFecha.txt");
 
-        if(salida.is_open() == false){
-            cout << "Error al crear el archivo de salida" << endl;
+        if(!salida.is_open() || !salidaFecha.is_open()){
+            cout << "Error al crear los archivos de salida" << endl;
             return 1;
         }
 
-        //Extraer los registros del Heap
+        //Ordenar los registros por IP
         for(int i = 0; i < contador; i++){
             Log registro = registros.pop();
 
@@ -128,9 +143,23 @@ int main(){
                    << registro.message << endl;
         }
 
-        salida.close();
+        //Ordenar los registros por fecha y hora
+        for(int i = 0; i < contador; i++){
+            Log registro = registrosFecha.pop();
 
-        cout << "Registros ordenados correctamente" << endl;
+            salidaFecha << registro.year << " "
+                        << registro.month << " "
+                        << registro.day << " "
+                        << registro.time << " "
+                        << registro.ip << " "
+                        << registro.message << endl;
+        }
+
+        salida.close();
+        salidaFecha.close();
+
+        cout << "Registros ordenados por IP correctamente" << endl;
+        cout << "Registros ordenados por fecha correctamente" << endl;
     }
 
     archivo.close();
