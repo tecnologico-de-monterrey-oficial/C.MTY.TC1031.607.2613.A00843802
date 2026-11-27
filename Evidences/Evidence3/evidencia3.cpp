@@ -90,6 +90,9 @@ int main(){
         Heap<Log> registrosFecha(compararFecha);
         Heap<Log> registrosMensaje(compararMensaje);
 
+        //Crear el BST de direcciones IP
+        BST<unsigned long long> direccionesIP;
+
         //Leer cada linea del archivo
         while(getline(archivo, linea)){
 
@@ -123,6 +126,10 @@ int main(){
             registros.push(registro);
             registrosFecha.push(registro);
             registrosMensaje.push(registro);
+
+            //Convertir e insertar la IP en el BST
+            unsigned long long ipNumerica = convertirIP(ip);
+            direccionesIP.insert(ipNumerica);
 
             contador++;
         }
@@ -183,6 +190,14 @@ int main(){
         cout << "Registros ordenados por IP correctamente" << endl;
         cout << "Registros ordenados por fecha correctamente" << endl;
         cout << "Registros ordenados por mensaje correctamente" << endl;
+
+        //Comprobar el funcionamiento del BST
+        string ipPrueba = "192.168.255.156";
+
+        cout << "IP de prueba: " << ipPrueba << endl;
+        cout << "Cantidad de apariciones: "
+             << direccionesIP.getCount(convertirIP(ipPrueba))
+             << endl;
     }
 
     archivo.close();
