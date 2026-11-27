@@ -70,6 +70,11 @@ bool compararFecha(const Log &a, const Log &b){
     return fechaA > fechaB;
 }
 
+//Comparar los registros por mensaje
+bool compararMensaje(const Log &a, const Log &b){
+    return a.message > b.message;
+}
+
 int main(){
     ifstream archivo("log607-3.json");
 
@@ -83,6 +88,7 @@ int main(){
         //Crear los Heaps
         Heap<Log> registros;
         Heap<Log> registrosFecha(compararFecha);
+        Heap<Log> registrosMensaje(compararMensaje);
 
         //Leer cada linea del archivo
         while(getline(archivo, linea)){
@@ -116,6 +122,7 @@ int main(){
             //Insertar el registro en los Heaps
             registros.push(registro);
             registrosFecha.push(registro);
+            registrosMensaje.push(registro);
 
             contador++;
         }
@@ -125,8 +132,10 @@ int main(){
         //Crear los archivos de salida
         ofstream salida("registrosOrdenados.txt");
         ofstream salidaFecha("registrosPorFecha.txt");
+        ofstream salidaMensaje("registrosPorMensaje.txt");
 
-        if(!salida.is_open() || !salidaFecha.is_open()){
+        if(!salida.is_open() || !salidaFecha.is_open() ||
+           !salidaMensaje.is_open()){
             cout << "Error al crear los archivos de salida" << endl;
             return 1;
         }
@@ -155,11 +164,25 @@ int main(){
                         << registro.message << endl;
         }
 
+        //Ordenar los registros por mensaje
+        for(int i = 0; i < contador; i++){
+            Log registro = registrosMensaje.pop();
+
+            salidaMensaje << registro.message << " "
+                          << registro.ip << " "
+                          << registro.year << " "
+                          << registro.month << " "
+                          << registro.day << " "
+                          << registro.time << endl;
+        }
+
         salida.close();
         salidaFecha.close();
+        salidaMensaje.close();
 
         cout << "Registros ordenados por IP correctamente" << endl;
         cout << "Registros ordenados por fecha correctamente" << endl;
+        cout << "Registros ordenados por mensaje correctamente" << endl;
     }
 
     archivo.close();
