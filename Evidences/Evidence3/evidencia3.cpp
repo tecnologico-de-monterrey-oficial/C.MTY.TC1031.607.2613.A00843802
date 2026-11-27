@@ -75,6 +75,39 @@ bool compararMensaje(const Log &a, const Log &b){
     return a.message > b.message;
 }
 
+//Validar una direccion IP
+bool validarIP(string ip){
+    stringstream ss(ip);
+    string parte;
+    int contador = 0;
+
+    if(ip.empty() || ip.back() == '.'){
+        return false;
+    }
+
+    while(getline(ss, parte, '.')){
+        if(parte.empty() || parte.length() > 3){
+            return false;
+        }
+
+        for(char caracter : parte){
+            if(caracter < '0' || caracter > '9'){
+                return false;
+            }
+        }
+
+        int numero = stoi(parte);
+
+        if(numero < 0 || numero > 255){
+            return false;
+        }
+
+        contador++;
+    }
+
+    return contador == 4;
+}
+
 int main(){
     ifstream archivo("log607-3.json");
 
@@ -191,13 +224,36 @@ int main(){
         cout << "Registros ordenados por fecha correctamente" << endl;
         cout << "Registros ordenados por mensaje correctamente" << endl;
 
-        //Comprobar el funcionamiento del BST
-        string ipPrueba = "192.168.255.156";
+        //Consultar direcciones IP
+        string ipConsulta;
 
-        cout << "IP de prueba: " << ipPrueba << endl;
-        cout << "Cantidad de apariciones: "
-             << direccionesIP.getCount(convertirIP(ipPrueba))
-             << endl;
+        while(true){
+            cout << endl;
+            cout << "Ingresa una direccion IP o 0 para salir: ";
+
+            if(!(cin >> ipConsulta)){
+                break;
+            }
+
+            if(ipConsulta == "0"){
+                break;
+            }
+
+            //Validar la IP ingresada
+            if(!validarIP(ipConsulta)){
+                cout << "Direccion IP no valida" << endl;
+                continue;
+            }
+
+            //Buscar la cantidad de apariciones
+            unsigned long long ipNumerica = convertirIP(ipConsulta);
+            int cantidad = direccionesIP.getCount(ipNumerica);
+
+            cout << "IP: " << ipConsulta << endl;
+            cout << "Cantidad de apariciones: " << cantidad << endl;
+        }
+
+        cout << "Fin del programa" << endl;
     }
 
     archivo.close();
