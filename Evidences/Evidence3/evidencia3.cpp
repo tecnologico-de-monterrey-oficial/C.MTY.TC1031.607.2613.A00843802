@@ -5,6 +5,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <vector> //NUEVO
+#include <limits> //NUEVO
 #include "Log3.h"
 #include "Heap3.h"
 #include "BST3.h"
@@ -62,19 +64,6 @@ string extraerCampo(string linea, string campo){
     return linea.substr(inicio, fin - inicio);
 }
 
-//Comparar los registros por fecha y hora
-bool compararFecha(const Log &a, const Log &b){
-    string fechaA = a.key.substr(12, 14);
-    string fechaB = b.key.substr(12, 14);
-
-    return fechaA > fechaB;
-}
-
-//Comparar los registros por mensaje
-bool compararMensaje(const Log &a, const Log &b){
-    return a.message > b.message;
-}
-
 //Validar una direccion IP
 bool validarIP(string ip){
     stringstream ss(ip);
@@ -108,23 +97,127 @@ bool validarIP(string ip){
     return contador == 4;
 }
 
-//Verificar el orden de dos registros
-bool verificarOrden(const Log &anterior, const Log &actual,
-                    int tipo){
+//NUEVO
+//Validar la fecha del registro
+bool validarFecha(string month, int day, int year){
+    string meses[12] = {
+        "Jan", "Feb", "Mar", "Apr",
+        "May", "Jun", "Jul", "Aug",
+        "Sep", "Oct", "Nov", "Dec"
+    };
 
-    if(tipo == 1){
-        return anterior >= actual;
+    int dias[12] = {
+        31, 28, 31, 30, 31, 30,
+        31, 31, 30, 31, 30, 31
+    };
+
+    if(year <= 0){
+        return false;
     }
 
-    if(tipo == 2){
-        return !compararFecha(actual, anterior);
+    //Validar si el año es bisiesto
+    if(year % 400 == 0 ||
+       (year % 4 == 0 && year % 100 != 0)){
+        dias[1] = 29;
     }
 
-    if(tipo == 3){
-        return !compararMensaje(actual, anterior);
+    //Buscar el mes y validar el dia
+    for(int i = 0; i < 12; i++){
+        if(month == meses[i]){
+            return day >= 1 && day <= dias[i];
+        }
     }
 
     return false;
+}
+
+//NUEVO
+//Validar la hora del registro
+bool validarHora(string time){
+    if(time.length() != 8){
+        return false;
+    }
+
+    if(time[2] != ':' || time[5] != ':'){
+        return false;
+    }
+
+    //Validar que los caracteres sean numeros
+    for(int i = 0; i < time.length(); i++){
+        if(i != 2 && i != 5){
+            if(time[i] < '0' || time[i] > '9'){
+                return false;
+            }
+        }
+    }
+
+    int hora = stoi(time.substr(0, 2));
+    int minuto = stoi(time.substr(3, 2));
+    int segundo = stoi(time.substr(6, 2));
+
+    return hora >= 0 && hora <= 23 &&
+           minuto >= 0 && minuto <= 59 &&
+           segundo >= 0 && segundo <= 59;
+}
+
+//NUEVO
+//Validar todos los campos del registro
+string validarRegistro(string month, string day,
+                       string year, string time,
+                       string ip, string message){
+
+    //Validar que los campos no esten vacios
+    if(month.empty() || day.empty() ||
+       year.empty() || time.empty() ||
+       ip.empty() || message.empty()){
+        return "Campos incompletos";
+    }
+
+    //Validar que el dia sea numerico
+    for(char caracter : day){
+        if(caracter < '0' || caracter > '9'){
+            return "Dia no valido";
+        }
+    }
+
+    //Validar que el año sea numerico
+    for(char caracter : year){
+        if(caracter < '0' || caracter > '9'){
+            return "Anio no valido";
+        }
+    }
+
+    //Validar la fecha
+    try{
+        if(!validarFecha(month, stoi(day), stoi(year))){
+            return "Fecha no valida";
+        }
+    } catch(const exception&){
+        return "Fecha no valida";
+    }
+
+    //Validar la hora
+    if(!validarHora(time)){
+        return "Hora no valida";
+    }
+
+    //Validar la direccion IP
+    if(!validarIP(ip)){
+        return "Direccion IP no valida";
+    }
+
+    return "";
+}
+
+//NUEVO
+//Mostrar las opciones del programa
+void mostrarMenu(){
+    cout << endl;
+    cout << "---------- MENU ----------" << endl;
+    cout << "1. Mostrar cantidad de registros" << endl;
+    cout << "2. Consultar direccion IP" << endl;
+    cout << "0. Salir" << endl;
+    cout << "Selecciona una opcion: ";
 }
 
 int main(){
@@ -136,11 +229,10 @@ int main(){
     } else{
         string linea;
         int contador = 0;
+        int invalidos = 0; //NUEVO
 
-        //Crear los Heaps
-        Heap<Log> registros;
-        Heap<Log> registrosFecha(compararFecha);
-        Heap<Log> registrosMensaje(compararMensaje);
+        //Guardar los registros validos
+        vector<Log> registrosValidos; //NUEVO
 
         //Crear el BST de direcciones IP
         BST<unsigned long long> direccionesIP;
@@ -148,21 +240,27 @@ int main(){
         //Leer cada linea del archivo
         while(getline(archivo, linea)){
 
-            //Extraer los campos del registro
-            string ip = extraerCampo(linea, "ip");
-
-            if(ip.empty()){
+            //Ignorar las lineas que no contienen registros
+            if(linea.find('{') == string::npos){
                 continue;
             }
 
+            //Extraer los campos del registro
+            string ip = extraerCampo(linea, "ip");
             string month = extraerCampo(linea, "month");
             string day = extraerCampo(linea, "day");
             string year = extraerCampo(linea, "year");
             string time = extraerCampo(linea, "time");
             string message = extraerCampo(linea, "message");
 
-            if(month.empty() || day.empty() ||
-               year.empty() || time.empty()){
+            //NUEVO
+            //Validar el registro
+            string error = validarRegistro(month, day,
+                                           year, time,
+                                           ip, message);
+
+            if(!error.empty()){
+                invalidos++;
                 continue;
             }
 
@@ -171,13 +269,13 @@ int main(){
                          time, ip, message);
 
             if(registro.key.length() < 26){
+                invalidos++;
                 continue;
             }
 
-            //Insertar el registro en los Heaps
-            registros.push(registro);
-            registrosFecha.push(registro);
-            registrosMensaje.push(registro);
+            //NUEVO
+            //Guardar el registro valido
+            registrosValidos.push_back(registro);
 
             //Convertir e insertar la IP en el BST
             unsigned long long ipNumerica = convertirIP(ip);
@@ -186,144 +284,79 @@ int main(){
             contador++;
         }
 
-        cout << "Cantidad de registros: " << contador << endl;
+        archivo.close();
 
-        //Crear los archivos de salida
-        ofstream salida("registrosOrdenados.txt");
-        ofstream salidaFecha("registrosPorFecha.txt");
-        ofstream salidaMensaje("registrosPorMensaje.txt");
+        //Mostrar la cantidad de registros
+        cout << "Cantidad de registros validos: "
+             << contador << endl;
 
-        if(!salida.is_open() || !salidaFecha.is_open() ||
-           !salidaMensaje.is_open()){
-            cout << "Error al crear los archivos de salida" << endl;
-            return 1;
-        }
+        cout << "Cantidad de registros invalidos: "
+             << invalidos << endl;
 
-        //Variables para verificar el ordenamiento
-        bool ordenIP = true;
-        bool ordenFecha = true;
-        bool ordenMensaje = true;
-
-        Log anteriorIP;
-        Log anteriorFecha;
-        Log anteriorMensaje;
-
-        //Ordenar los registros por IP
-        for(int i = 0; i < contador; i++){
-            Log registro = registros.pop();
-
-            if(i > 0){
-                if(!verificarOrden(anteriorIP, registro, 1)){
-                    ordenIP = false;
-                }
-            }
-
-            anteriorIP = registro;
-
-            salida << registro.ip << " "
-                   << registro.year << " "
-                   << registro.month << " "
-                   << registro.day << " "
-                   << registro.time << " "
-                   << registro.message << endl;
-        }
-
-        //Ordenar los registros por fecha y hora
-        for(int i = 0; i < contador; i++){
-            Log registro = registrosFecha.pop();
-
-            if(i > 0){
-                if(!verificarOrden(anteriorFecha, registro, 2)){
-                    ordenFecha = false;
-                }
-            }
-
-            anteriorFecha = registro;
-
-            salidaFecha << registro.year << " "
-                        << registro.month << " "
-                        << registro.day << " "
-                        << registro.time << " "
-                        << registro.ip << " "
-                        << registro.message << endl;
-        }
-
-        //Ordenar los registros por mensaje
-        for(int i = 0; i < contador; i++){
-            Log registro = registrosMensaje.pop();
-
-            if(i > 0){
-                if(!verificarOrden(anteriorMensaje, registro, 3)){
-                    ordenMensaje = false;
-                }
-            }
-
-            anteriorMensaje = registro;
-
-            salidaMensaje << registro.message << " "
-                          << registro.ip << " "
-                          << registro.year << " "
-                          << registro.month << " "
-                          << registro.day << " "
-                          << registro.time << endl;
-        }
-
-        salida.close();
-        salidaFecha.close();
-        salidaMensaje.close();
-
-        //Mostrar los resultados de la verificacion
-        if(ordenIP){
-            cout << "Registros ordenados por IP correctamente" << endl;
-        } else{
-            cout << "Error en el ordenamiento por IP" << endl;
-        }
-
-        if(ordenFecha){
-            cout << "Registros ordenados por fecha correctamente" << endl;
-        } else{
-            cout << "Error en el ordenamiento por fecha" << endl;
-        }
-
-        if(ordenMensaje){
-            cout << "Registros ordenados por mensaje correctamente" << endl;
-        } else{
-            cout << "Error en el ordenamiento por mensaje" << endl;
-        }
-
-        //Consultar direcciones IP
-        string ipConsulta;
+        //NUEVO
+        //Mostrar el menu
+        int opcion;
 
         while(true){
-            cout << endl;
-            cout << "Ingresa una direccion IP o 0 para salir: ";
+            mostrarMenu();
 
-            if(!(cin >> ipConsulta)){
-                break;
-            }
+            //Validar la opcion ingresada
+            if(!(cin >> opcion)){
+                if(cin.eof()){
+                    break;
+                }
 
-            if(ipConsulta == "0"){
-                break;
-            }
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-            //Validar la IP ingresada
-            if(!validarIP(ipConsulta)){
-                cout << "Direccion IP no valida" << endl;
+                cout << "Opcion no valida" << endl;
                 continue;
             }
 
-            //Buscar la cantidad de apariciones
-            unsigned long long ipNumerica = convertirIP(ipConsulta);
-            int cantidad = direccionesIP.getCount(ipNumerica);
+            if(opcion == 0){
+                break;
+            }
 
-            cout << "IP: " << ipConsulta << endl;
-            cout << "Cantidad de apariciones: " << cantidad << endl;
+            if(opcion == 1){
+                cout << "Registros validos: "
+                     << registrosValidos.size() << endl;
+
+                cout << "Registros invalidos: "
+                     << invalidos << endl;
+
+            } else if(opcion == 2){
+
+                //Consultar direcciones IP
+                string ipConsulta;
+
+                cout << "Ingresa una direccion IP: ";
+
+                if(!(cin >> ipConsulta)){
+                    break;
+                }
+
+                //Validar la IP ingresada
+                if(!validarIP(ipConsulta)){
+                    cout << "Direccion IP no valida" << endl;
+                    continue;
+                }
+
+                //Buscar la cantidad de apariciones
+                unsigned long long ipNumerica = convertirIP(ipConsulta);
+
+                int cantidad = direccionesIP.getCount(ipNumerica);
+
+                cout << "IP: " << ipConsulta << endl;
+                cout << "Cantidad de apariciones: "
+                     << cantidad << endl;
+
+            } else{
+                cout << "Opcion no valida" << endl;
+            }
         }
 
         cout << "Fin del programa" << endl;
     }
-
-    archivo.close();
 
     return 0;
 }
