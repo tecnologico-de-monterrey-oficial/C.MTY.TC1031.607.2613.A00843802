@@ -108,6 +108,25 @@ bool validarIP(string ip){
     return contador == 4;
 }
 
+//Verificar el orden de dos registros
+bool verificarOrden(const Log &anterior, const Log &actual,
+                    int tipo){
+
+    if(tipo == 1){
+        return anterior >= actual;
+    }
+
+    if(tipo == 2){
+        return !compararFecha(actual, anterior);
+    }
+
+    if(tipo == 3){
+        return !compararMensaje(actual, anterior);
+    }
+
+    return false;
+}
+
 int main(){
     ifstream archivo("log607-3.json");
 
@@ -180,9 +199,26 @@ int main(){
             return 1;
         }
 
+        //Variables para verificar el ordenamiento
+        bool ordenIP = true;
+        bool ordenFecha = true;
+        bool ordenMensaje = true;
+
+        Log anteriorIP;
+        Log anteriorFecha;
+        Log anteriorMensaje;
+
         //Ordenar los registros por IP
         for(int i = 0; i < contador; i++){
             Log registro = registros.pop();
+
+            if(i > 0){
+                if(!verificarOrden(anteriorIP, registro, 1)){
+                    ordenIP = false;
+                }
+            }
+
+            anteriorIP = registro;
 
             salida << registro.ip << " "
                    << registro.year << " "
@@ -196,6 +232,14 @@ int main(){
         for(int i = 0; i < contador; i++){
             Log registro = registrosFecha.pop();
 
+            if(i > 0){
+                if(!verificarOrden(anteriorFecha, registro, 2)){
+                    ordenFecha = false;
+                }
+            }
+
+            anteriorFecha = registro;
+
             salidaFecha << registro.year << " "
                         << registro.month << " "
                         << registro.day << " "
@@ -207,6 +251,14 @@ int main(){
         //Ordenar los registros por mensaje
         for(int i = 0; i < contador; i++){
             Log registro = registrosMensaje.pop();
+
+            if(i > 0){
+                if(!verificarOrden(anteriorMensaje, registro, 3)){
+                    ordenMensaje = false;
+                }
+            }
+
+            anteriorMensaje = registro;
 
             salidaMensaje << registro.message << " "
                           << registro.ip << " "
@@ -220,9 +272,24 @@ int main(){
         salidaFecha.close();
         salidaMensaje.close();
 
-        cout << "Registros ordenados por IP correctamente" << endl;
-        cout << "Registros ordenados por fecha correctamente" << endl;
-        cout << "Registros ordenados por mensaje correctamente" << endl;
+        //Mostrar los resultados de la verificacion
+        if(ordenIP){
+            cout << "Registros ordenados por IP correctamente" << endl;
+        } else{
+            cout << "Error en el ordenamiento por IP" << endl;
+        }
+
+        if(ordenFecha){
+            cout << "Registros ordenados por fecha correctamente" << endl;
+        } else{
+            cout << "Error en el ordenamiento por fecha" << endl;
+        }
+
+        if(ordenMensaje){
+            cout << "Registros ordenados por mensaje correctamente" << endl;
+        } else{
+            cout << "Error en el ordenamiento por mensaje" << endl;
+        }
 
         //Consultar direcciones IP
         string ipConsulta;
