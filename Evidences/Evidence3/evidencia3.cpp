@@ -10,6 +10,8 @@
 #include <chrono>
 #include <functional>
 #include <exception>
+#include <cmath>
+#include <utility>
 #include "Log3.h"
 #include "Heap3.h"
 #include "BST3.h"
@@ -472,13 +474,120 @@ void ordenarRegistros(const vector<Log>& registrosValidos,
     }
 }
 
+//Convertir una IP numerica a su formato original
+string convertirIPTexto(unsigned long long ip){
+    return to_string((ip >> 24) & 255) + "." +
+           to_string((ip >> 16) & 255) + "." +
+           to_string((ip >> 8) & 255) + "." +
+           to_string(ip & 255);
+}
+
+//Comparar las IP por cantidad de apariciones
+bool compararApariciones(const pair<unsigned long long, int>& a,
+                         const pair<unsigned long long, int>& b){
+    if(a.second == b.second){
+        return a.first < b.first;
+    }
+
+    return a.second > b.second;
+}
+
+//Mostrar las 10 direcciones IP con mas apariciones
+void mostrarTop10(BST<unsigned long long>& direccionesIP){
+    vector<pair<unsigned long long, int>> lista = direccionesIP.inOrder();
+
+    if(lista.empty()){
+        cout << "No hay direcciones IP" << endl;
+        return;
+    }
+
+    //Crear el MaxHeap de apariciones
+    Heap<pair<unsigned long long, int>> registros(compararApariciones);
+
+    for(int i = 0; i < lista.size(); i++){
+        registros.push(lista[i]);
+    }
+
+    cout << endl;
+    cout << "---------- TOP 10 DE IP ----------" << endl;
+
+    int lugar = 0;
+    int apariciones = 0;
+
+    //Extraer las 10 IP con mayor cantidad de apariciones
+    while(!registros.empty() && lugar < 10){
+        pair<unsigned long long, int> registro = registros.pop();
+        lugar++;
+        apariciones = registro.second;
+
+        cout << lugar << ". " << convertirIPTexto(registro.first)
+             << " - " << registro.second << " apariciones" << endl;
+    }
+
+    //Contar las IP adicionales empatadas con el decimo lugar
+    int empatadas = 0;
+
+    if(lugar == 10){
+        while(!registros.empty() && registros.top().second == apariciones){
+            registros.pop();
+            empatadas++;
+        }
+
+        if(empatadas > 0){
+            cout << "Hay " << empatadas
+                 << " IP adicionales empatadas con el decimo lugar" << endl;
+        } else{
+            cout << "No hay mas IP empatadas con el decimo lugar" << endl;
+        }
+    } else{
+        cout << "Hay menos de 10 direcciones IP distintas" << endl;
+    }
+}
+
+//Consultar una direccion IP y mostrar las metricas del BST
+void consultarIP(BST<unsigned long long>& direccionesIP, string ip){
+    unsigned long long ipNumerica = convertirIP(ip);
+    pair<int, int> resultado = direccionesIP.search(ipNumerica);
+
+    int cantidad = resultado.first;
+    int comparaciones = resultado.second;
+    int altura = direccionesIP.height();
+    int nodos = direccionesIP.size();
+
+    cout << "IP: " << ip << endl;
+    cout << "Existe: " << (cantidad > 0 ? "Si" : "No") << endl;
+    cout << "Cantidad de apariciones: " << cantidad << endl;
+    cout << "Comparaciones realizadas: " << comparaciones << endl;
+    cout << "Cantidad de IP distintas: " << nodos << endl;
+    cout << "Altura real del BST: " << altura << endl;
+
+    //Calcular la altura teorica solicitada
+    if(nodos > 0){
+        int alturaTeorica = static_cast<int>(ceil(log2(nodos)));
+
+        cout << "Altura teorica del BST: " << alturaTeorica << endl;
+
+        if(altura > alturaTeorica){
+            cout << "La altura real supera la teorica por "
+                 << altura - alturaTeorica << endl;
+        } else if(altura == alturaTeorica){
+            cout << "La altura real es igual a la teorica" << endl;
+        } else{
+            cout << "La altura real es menor que la teorica por "
+                 << alturaTeorica - altura << endl;
+        }
+    } else{
+        cout << "Altura teorica no definida: BST vacio" << endl;
+    }
+}
+
 //Mostrar las opciones del programa
 void mostrarMenu(){
     cout << endl;
     cout << "---------- MENU ----------" << endl;
     cout << "1. Ordenar registros de forma descendente" << endl;
     cout << "2. Ordenar registros de forma ascendente" << endl;
-    cout << "3. Top 10 de direcciones IP (pendiente)" << endl;
+    cout << "3. Top 10 de direcciones IP" << endl;
     cout << "4. Consultar direccion IP" << endl;
     cout << "5. Salir" << endl;
     cout << "Selecciona una opcion: ";
@@ -595,7 +704,7 @@ int main(){
 
             } else if(opcion == 3){
 
-                cout << "Top 10 pendiente del commit 17" << endl;
+                mostrarTop10(direccionesIP);
 
             } else if(opcion == 4){
 
@@ -614,17 +723,8 @@ int main(){
                     continue;
                 }
 
-                //Buscar la cantidad de apariciones
-                unsigned long long ipNumerica =
-                    convertirIP(ipConsulta);
-
-                int cantidad =
-                    direccionesIP.getCount(ipNumerica);
-
-                cout << "IP: " << ipConsulta << endl;
-
-                cout << "Cantidad de apariciones: "
-                     << cantidad << endl;
+                //Buscar la IP y mostrar las metricas
+                consultarIP(direccionesIP, ipConsulta);
 
             } else{
                 cout << "Opcion no valida" << endl;
